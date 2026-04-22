@@ -1,0 +1,27 @@
+{
+  "name": "ringslot-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.460.0",
+    "motion": "^11.11.17",
+    "axios": "^1.7.7",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "postcss": "^8",
+    "tailwindcss": "^4.1.14",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.4"
+  }
+}

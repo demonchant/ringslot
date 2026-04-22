@@ -1,0 +1,13 @@
+# RingSlot - Professional Virtual Phone Numbers
+
+RingSlot provides high-intent virtual phone numbers for instant SMS verification in over 170 countries. 
+Optimized for developers and privacy-conscious users.
+
+## Key Services
+- Telegram Verification
+- WhatsApp Verification
+- Google Account Creation
+- Crypto Payments (BTC, ETH, SOL, USDT)
+
+## API Access
+Full REST API available at /api. Documentation at /api-docs.
