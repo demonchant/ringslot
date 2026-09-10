@@ -94,7 +94,7 @@ export default function Dashboard() {
       poll(res.data.orderId);
       try { const r = await api.get('/wallet/balance'); setBalance(r.data.balance); } catch {}
       try { const r = await api.get('/orders'); setOrders(r.data); } catch {}
-    } catch (err) { setBuyError(err.message || 'Purchase failed'); }
+    } catch (err) { setBuyError(err.response?.data?.error || err.message || 'Purchase failed'); }
     setBuyLoading(false);
   }
 
@@ -122,7 +122,7 @@ export default function Dashboard() {
       clearInterval(pollRef.current); clearInterval(cdRef.current); setCountdown(0);
       try { const r = await api.get('/wallet/balance'); setBalance(r.data.balance); } catch {}
       try { const r = await api.get('/orders'); setOrders(r.data); } catch {}
-    } catch (err) { setBuyError(err.message || 'Cancel failed'); }
+    } catch (err) { setBuyError(err.response?.data?.error || err.message || 'Cancel failed'); }
   }
 
   function copy(text, key) {
@@ -154,7 +154,7 @@ export default function Dashboard() {
       } else {
         setRentError(res.data?.error || 'Rental failed. Check your balance.');
       }
-    } catch (err) { setRentError(err.message || 'Rental failed'); }
+    } catch (err) { setRentError(err.response?.data?.error || err.message || 'Rental failed'); }
     setRentLoading(false);
   }
 

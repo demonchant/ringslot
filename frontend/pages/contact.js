@@ -73,8 +73,8 @@ export default function ContactPage() {
       } else {
         setError(response.data?.error || 'We could not send your message. Please try again.');
       }
-    } catch {
-      setError('We could not reach support. Please email support@ringslot.shop.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'We could not reach support. Please email support@ringslot.shop.');
     } finally {
       setLoading(false);
     }

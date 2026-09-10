@@ -22,7 +22,9 @@ export default function StatusPage() {
         const response = await api.get(check.path);
         const healthy = response.status < 400 && response.data?.status === 'ok';
         return [check.key, { state: healthy ? 'operational' : 'degraded', latency: response.data?.latencyMs }];
-      } catch {
+      } catch (error) {
+        const response = error.response;
+        if (response) return [check.key, { state: 'degraded', latency: response.data?.latencyMs }];
         return [check.key, { state: 'unavailable' }];
       }
     }));

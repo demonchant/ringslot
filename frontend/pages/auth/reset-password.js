@@ -31,7 +31,7 @@ export default function ResetPassword() {
       const res = await api.post('/auth/reset-password', { token, password: form.password });
       if (res.status === 200 && res.data?.success) setDone(true);
       else setError(res.data?.error || 'Something went wrong');
-    } catch { setError('Cannot reach server.'); }
+    } catch (err) { setError(err.response?.data?.error || 'Cannot reach server.'); }
     setLoading(false);
   }
 

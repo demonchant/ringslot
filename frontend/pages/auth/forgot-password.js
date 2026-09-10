@@ -22,7 +22,10 @@ export default function ForgotPassword() {
       } else {
         setError(res.data?.detail || res.data?.error || `Error ${res.status}`);
       }
-    } catch { setError('Cannot reach server. Please check your connection.'); }
+    } catch (err) {
+      if (err.response?.status === 429) setError('Too many attempts. Please wait an hour and try again.');
+      else setError(err.response?.data?.detail || err.response?.data?.error || 'Cannot reach server. Please check your connection.');
+    }
     setLoading(false);
   }
 

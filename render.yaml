@@ -15,7 +15,7 @@ services:
     plan: starter
     region: oregon
     numInstances: 1
-    autoDeploy: true
+    autoDeploy: false
     healthCheckPath: /api/health
     scaling:
       minInstances: 1

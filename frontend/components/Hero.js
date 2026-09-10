@@ -29,7 +29,7 @@ export default function Hero() {
         localStorage.setItem('rs_user', JSON.stringify(res.data.user));
         window.location.href = '/dashboard';
       } else { setError(res.data?.error || 'Registration failed'); }
-    } catch { setError('Cannot reach server. Try again.'); }
+    } catch (err) { setError(err.response?.data?.error || 'Cannot reach server. Try again.'); }
     setLoading(false);
   }
 

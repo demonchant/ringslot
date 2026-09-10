@@ -60,7 +60,10 @@ export default function Login() {
       } else {
         setError(res.data?.error || 'Invalid email or password');
       }
-    } catch { setError('Cannot reach server. Please check your connection.'); }
+    } catch (err) {
+      if (err.response?.status === 429) setError('Too many attempts. Please wait 15 minutes.');
+      else setError(err.response?.data?.error || 'Cannot reach server. Please check your connection.');
+    }
     setLoading(false);
   }
 

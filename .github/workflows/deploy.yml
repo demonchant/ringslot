@@ -69,7 +69,7 @@ jobs:
           # Uncomment to add Slack/Discord webhook notification:
           # curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           #   -H "Content-Type: application/json" \
-          #   -d "{\"text\":\"RingSlot API deployed successfully from commit ${{ github.event.workflow_run.head_sha }}\"}"
+          #   -d "{\"text\":\"RingSlot API deployed successfully from commit ${{ github.sha }}\"}"
 
   notify-failure:
     name: Notify Failure
@@ -85,4 +85,4 @@ jobs:
           # Uncomment to add Slack/Discord webhook notification:
           # curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           #   -H "Content-Type: application/json" \
-          #   -d "{\"text\":\"ALERT: RingSlot API deployment failed for commit ${{ github.event.workflow_run.head_sha }}\"}"
+          #   -d "{\"text\":\"ALERT: RingSlot API deployment failed for commit ${{ github.sha }}\"}"

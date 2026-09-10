@@ -63,7 +63,11 @@ export default function Register() {
       } else {
         setError(res.data?.error || 'Registration failed. Please try again.');
       }
-    } catch { setError('Cannot reach server. Please try again.'); }
+    } catch (err) {
+      if (err.response?.status === 409) setError('This email is already registered.');
+      else if (err.response?.status === 429) setError('Too many attempts. Please wait and try again.');
+      else setError(err.response?.data?.error || 'Cannot reach server. Please try again.');
+    }
     setLoading(false);
   }
 
