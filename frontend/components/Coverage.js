@@ -24,7 +24,7 @@ export default function Coverage() {
         <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginBottom:48, flexWrap:'wrap', gap:20 }}>
           <div>
             <div className="section-tag" style={{ display:'inline-flex' }}>Global Coverage</div>
-            <h2 className="section-h2">170+ countries available</h2>
+            <h2 className="section-h2">90+ selectable countries</h2>
             <p style={{ fontSize:16, color:'var(--slate-500)' }}>Numbers from virtually every country on earth</p>
           </div>
           <input type="search" placeholder="Search countries…" value={search} onChange={e => setSearch(e.target.value)}
@@ -52,7 +52,7 @@ export default function Coverage() {
         {filtered.length === 0 && <div style={{ textAlign:'center', padding:48, color:'var(--slate-400)' }}>No countries match "{search}"</div>}
 
         <div style={{ textAlign:'center', marginTop:40 }}>
-          <Link href="/dashboard"><button className="btn-outline-purple">Browse all 170+ countries →</button></Link>
+          <Link href="/countries"><button className="btn-outline-purple">Browse all countries →</button></Link>
         </div>
       </div>
     </section>

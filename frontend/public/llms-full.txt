@@ -1,0 +1,52 @@
+# RingSlot: expanded reference
+
+Canonical source: https://ringslot.shop/
+
+RingSlot is a web service for purchasing one-time virtual phone number activations and receiving an SMS verification code through an authenticated dashboard or REST API. It is intended for legitimate privacy, authorized operations, customer-support workflows, and QA/testing. It must not be represented as a way to bypass platform rules or safety controls.
+
+## User journey
+
+1. Create an account with an email address and password.
+2. Sign in and complete new-device email verification when required.
+3. Deposit at least $20 USD equivalent using a currency currently offered by the payment processor.
+4. Select a configured service and country in the dashboard.
+5. Confirm purchase; inventory and price depend on upstream providers.
+6. Use the assigned number only for an authorized verification attempt.
+7. The dashboard checks for an incoming SMS during the 10-minute activation window.
+8. If an eligible order expires without an SMS, its price is returned to the user’s RingSlot wallet.
+
+## Current capabilities
+
+- Email/password registration, login, trusted-device verification, and password reset
+- Wallet deposits through a third-party cryptocurrency processor
+- Provider routing for one-time number activations
+- OTP polling, order history, cancellation, and automatic wallet refunds
+- REST API keys and documented endpoints
+- Authenticated support-ticket backend and a public contact form
+- Live infrastructure health checks
+
+Long-term rentals, social login, public customer reviews, guaranteed delivery times, guaranteed third-party acceptance, and customer-configurable outbound webhooks are not currently supported and should not be claimed.
+
+## API summary
+
+Production API base: `https://ringslot-backend.onrender.com/api`
+
+- `GET /services` — active configured services
+- `POST /auth/register` — create account
+- `POST /auth/login` — sign in
+- `GET /wallet/balance` — wallet balance (authenticated)
+- `POST /wallet/deposit` — create deposit (authenticated)
+- `POST /orders/buy` — purchase activation (authenticated)
+- `GET /orders/sms?id={orderId}` — check activation (authenticated)
+- `POST /orders/cancel` with `{ "id": "..." }` — cancel eligible waiting order
+- `GET /orders` — order history (authenticated)
+
+API clients use `X-API-Key`. Browser sessions use `Authorization: Bearer ...`.
+
+## Trust and policy
+
+The service stores account, security, order, payment-reference, support, and operational data as described in its Privacy Policy. Cryptocurrency transfers can be irreversible. Wallet refunds are normally service credit, not cash withdrawals. Users must read the Terms, Privacy Policy, Acceptable Use Policy, and Refund Policy linked from every page footer.
+
+RingSlot depends on third-party number providers, carriers, cryptocurrency payment infrastructure, hosting, email delivery, and the platform sending the SMS. Inventory, price, and delivery can change. Third-party trademarks belong to their owners; directory listings do not imply endorsement or affiliation.
+
+Support: support@ringslot.shop

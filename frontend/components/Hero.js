@@ -1,60 +1,135 @@
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { LogoIcon } from './LogoIcon';
+import api from '../utils/api';
+
+const TICKER = ['Telegram','WhatsApp','Google','Instagram','Discord','Binance','TikTok','Facebook','Snapchat','Twitter/X'];
 
 export default function Hero() {
+  const [tick, setTick] = useState(0);
+  const [form, setForm] = useState({ email:'', password:'', confirm:'' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+  const router_ref = typeof window !== 'undefined' ? window : null;
+
+  useEffect(() => {
+    const t = setInterval(() => setTick(p => (p+1) % TICKER.length), 2000);
+    return () => clearInterval(t);
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (form.password !== form.confirm) return setError('Passwords do not match');
+    if (form.password.length < 8) return setError('Password must be at least 8 characters');
+    setLoading(true); setError('');
+    try {
+      const res = await api.post('/auth/register', { email: form.email.trim().toLowerCase(), password: form.password });
+      if (res.status === 201 && res.data?.token) {
+        localStorage.setItem('rs_token', res.data.token);
+        localStorage.setItem('rs_user', JSON.stringify(res.data.user));
+        window.location.href = '/dashboard';
+      } else { setError(res.data?.error || 'Registration failed'); }
+    } catch { setError('Cannot reach server. Try again.'); }
+    setLoading(false);
+  }
+
   return (
-    <section style={{ padding: '120px 0 80px', overflow: 'hidden', position: 'relative' }}>
-      {/* Decors */}
-      <div style={{ position: 'absolute', top: -100, left: '50%', transform: 'translateX(-50%)', width: 1000, height: 400, background: 'radial-gradient(circle, rgba(147,51,234,0.06) 0%, transparent 70%)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '10%', right: '5%', width: 12, height: 12, borderRadius: '50%', background: 'var(--primary-200)', opacity: 0.5 }} />
-      
-      <div className="wrap" style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ textAlign: 'center', maxWidth: 840, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '6px 16px', background: 'var(--primary-50)', border: '1.5px solid var(--primary-100)', borderRadius: 24, fontSize: 13, color: 'var(--primary-600)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 32 }}>
-            <span style={{ display: 'flex', gap: 4 }}>
-              {[1, 2, 3].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--primary-400)', animation: 'pulse 2s infinite', animationDelay: `${i * 0.3}s` }} />)}
-            </span>
-            Instant Activations Now Available
-          </div>
+    <section style={{ paddingTop:100, paddingBottom:80, background:'linear-gradient(180deg,var(--primary-50) 0%,#fafafa 100%)', position:'relative', overflow:'hidden' }}>
+      {/* Background blobs */}
+      <div style={{ position:'absolute', top:'-20%', right:'-10%', width:640, height:640, background:'radial-gradient(circle,rgba(168,85,247,0.12) 0%,transparent 70%)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-10%', left:'-5%', width:480, height:480, background:'radial-gradient(circle,rgba(147,51,234,0.08) 0%,transparent 70%)', pointerEvents:'none' }} />
 
-          <h1 className="font-display" style={{ fontSize: 'clamp(44px, 8vw, 84px)', lineHeight: 0.95, fontWeight: 900, letterSpacing: '-0.04em', marginBottom: 28, color: 'var(--slate-900)' }}>
-            Elevate Your <span style={{ color: 'var(--primary-600)', position: 'relative' }}>
-              Digital Identity
-              <svg style={{ position: 'absolute', bottom: -12, left: 0, width: '100%' }} viewBox="0 0 300 12" fill="none" preserveAspectRatio="none">
-                <path d="M1 10.5C50 3.5 150 2.5 299 10.5" stroke="var(--primary-200)" strokeWidth="3" strokeLinecap="round" />
-              </svg>
-            </span>
-          </h1>
+      <div className="wrap">
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))', gap:64, alignItems:'center' }}>
 
-          <p style={{ fontSize: 'clamp(17px, 2.5vw, 20px)', lineHeight: 1.6, color: 'var(--slate-500)', fontWeight: 500, marginBottom: 44, maxWidth: 640, margin: '0 auto 44px' }}>
-            Instant access to secure temporary phone numbers for SMS verification. Fast, affordable, and private. Trusted by 250k+ users.
-          </p>
+          {/* Left — headline */}
+          <div>
+            <div className="section-tag">
+              <span style={{ width:7, height:7, borderRadius:'50%', background:'var(--primary-500)', display:'inline-block', animation:'pulse 2s infinite' }} />
+              Live · Numbers available now
+            </div>
 
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/dashboard"><button className="btn-purple">Get Started Now</button></Link>
-            <Link href="#pricing"><button className="btn-outline-purple">View Pricing</button></Link>
-          </div>
+            <h1 className="font-display" style={{ fontSize:'clamp(36px,5.5vw,64px)', fontWeight:700, lineHeight:1.08, letterSpacing:'-0.04em', color:'var(--slate-900)', marginBottom:20 }}>
+              Buy virtual numbers<br/>for{' '}
+              <span style={{ color:'var(--primary-600)', position:'relative' }}>
+                SMS verification
+              </span>
+              <br/>
+              <span style={{ fontSize:'0.65em', color:'var(--slate-600)' }}>across global inventory</span>
+            </h1>
 
-          <div style={{ marginTop: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ display: 'flex', marginRight: -12 }}>
-                {[1, 2, 3, 4].map(i => (
-                  <img key={i} src={`https://picsum.photos/seed/user${i}/48/48`} alt="" style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #fff', background: 'var(--slate-100)' }} />
+            {/* Rotating service ticker */}
+            <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, height:36, overflow:'hidden' }}>
+              <span style={{ fontSize:14, color:'var(--slate-500)', fontWeight:500 }}>Works with</span>
+              <div style={{ position:'relative', height:36, flex:1, overflow:'hidden' }}>
+                {TICKER.map((s,i) => (
+                  <div key={s} style={{ position:'absolute', top:0, left:0, fontFamily:'Space Grotesk,sans-serif', fontSize:18, fontWeight:700, color:'var(--primary-700)', transition:'all 0.4s cubic-bezier(.4,0,.2,1)', opacity: i===tick?1:0, transform: i===tick?'translateY(0)':'translateY(20px)' }}>
+                    {s}
+                  </div>
                 ))}
-                <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #fff', background: 'var(--primary-600)', color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+2.5k</div>
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--slate-900)' }}>4.9/5 Rating</div>
-                <div style={{ fontSize: 11, color: 'var(--slate-400)', fontWeight: 600 }}>FROM TRUSTED CUSTOMERS</div>
               </div>
             </div>
-            
-            <div style={{ height: 32, width: 1.5, background: 'var(--slate-100)', display: 'none', md: 'block' }} />
 
-            <div style={{ display: 'flex', gap: 24, opacity: 0.4, filter: 'grayscale(1)' }}>
-              {['Amazon', 'Google', 'WhatsApp', 'Telegram'].map(p => (
-                <span key={p} style={{ fontWeight: 800, fontSize: 14, letterSpacing: '.05em' }}>{p.toUpperCase()}</span>
+            <p style={{ fontSize:17, color:'var(--slate-500)', lineHeight:1.8, marginBottom:32, maxWidth:460 }}>
+              Request one-time activations for Telegram, WhatsApp, Google, TikTok, Facebook and <strong style={{ color:'var(--slate-700)' }}>dozens of configured services</strong>. Pay with crypto. From <strong style={{ color:'var(--primary-600)' }}>$0.10</strong>, subject to inventory.
+            </p>
+
+            {/* Stats row */}
+            <div style={{ display:'flex', gap:32, flexWrap:'wrap' }}>
+              {[['90+','Countries'],['Dozens','Services'],['$0.10','Starting price'],['10min','Activation window']].map(([v,l]) => (
+                <div key={l}>
+                  <div className="font-display" style={{ fontSize:24, fontWeight:700, color:'var(--primary-700)', lineHeight:1 }}>{v}</div>
+                  <div style={{ fontSize:12, color:'var(--slate-400)', fontWeight:500, marginTop:3 }}>{l}</div>
+                </div>
               ))}
+            </div>
+          </div>
+
+          {/* Right — signup card */}
+          <div>
+            <div style={{ background:'#fff', borderRadius:24, padding:36, boxShadow:'0 24px 80px rgba(147,51,234,0.12), 0 4px 16px rgba(0,0,0,0.06)', border:'1px solid var(--primary-100)' }}>
+              {/* Phone mockup header */}
+              <div style={{ background:'linear-gradient(135deg,var(--primary-600),var(--primary-800))', borderRadius:16, padding:20, marginBottom:28, position:'relative', overflow:'hidden' }}>
+                <div style={{ position:'absolute', top:-20, right:-20, width:100, height:100, background:'rgba(255,255,255,0.08)', borderRadius:'50%' }} />
+                <div style={{ fontSize:11, color:'rgba(255,255,255,0.7)', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8 }}>Active Number</div>
+                <div className="font-mono" style={{ fontSize:22, fontWeight:700, color:'#fff', marginBottom:16 }}>+1 (424) 678-****</div>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <div style={{ width:8, height:8, borderRadius:'50%', background:'#4ade80', boxShadow:'0 0 8px #4ade80' }} />
+                  <span style={{ fontSize:13, color:'rgba(255,255,255,0.8)', fontWeight:500 }}>OTP received · 481 902</span>
+                </div>
+              </div>
+
+              <h3 className="font-display" style={{ fontSize:20, fontWeight:700, marginBottom:6, color:'var(--slate-900)' }}>Create Account</h3>
+              <p style={{ fontSize:14, color:'var(--slate-400)', marginBottom:24 }}>Start in 60 seconds — no credit card required</p>
+
+              {error && <div style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:10, padding:'10px 14px', marginBottom:16, fontSize:13, color:'#dc2626' }}>{error}</div>}
+
+              {done ? (
+                <div style={{ textAlign:'center', padding:'16px 0' }}>
+                  <div style={{ fontSize:40, marginBottom:8 }}>✅</div>
+                  <p style={{ color:'var(--primary-600)', fontWeight:700 }}>Account created! Redirecting…</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <input className="input-light" type="email" placeholder="Email address" required value={form.email}
+                    onChange={e => setForm(f => ({...f, email:e.target.value}))} style={{ marginBottom:12 }} />
+                  <input className="input-light" type="password" placeholder="Password (8+ characters)" required value={form.password}
+                    onChange={e => setForm(f => ({...f, password:e.target.value}))} style={{ marginBottom:12 }} />
+                  <input className="input-light" type="password" placeholder="Confirm password" required value={form.confirm}
+                    onChange={e => setForm(f => ({...f, confirm:e.target.value}))} style={{ marginBottom:20 }} />
+
+                  <button type="submit" className="btn-purple" style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }} disabled={loading}>
+                    {loading ? (
+                      <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ animation:'rs-spin .75s linear infinite' }}><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/></svg>Creating account…</>
+                    ) : 'Get started free →'}
+                  </button>
+                </form>
+              )}
+
+              <p style={{ textAlign:'center', marginTop:16, fontSize:13, color:'var(--slate-400)' }}>
+                Already have an account?{' '}
+                <Link href="/login" style={{ color:'var(--primary-600)', fontWeight:600, textDecoration:'none' }}>Sign in</Link>
+              </p>
             </div>
           </div>
         </div>

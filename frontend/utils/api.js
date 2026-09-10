@@ -1,11 +1,25 @@
 import axios from 'axios';
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
+const DEFAULT_ORIGIN = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:4000'
+  : 'https://ringslot-backend.onrender.com';
+const BASE = (process.env.NEXT_PUBLIC_API_URL || DEFAULT_ORIGIN).replace(/\/$/, '') + '/api';
+const api = axios.create({ baseURL:BASE, headers:{'Content-Type':'application/json'}, timeout:30000, validateStatus:()=>true });
+api.interceptors.request.use(c => {
+  if (typeof window !== 'undefined') {
+    const t = localStorage.getItem('rs_token');
+    if (t) c.headers.Authorization = `Bearer ${t}`;
+  }
+  return c;
 });
-
+api.interceptors.response.use(r => {
+  if (r.status === 401 && typeof window !== 'undefined') {
+    const isAuth = r.config?.url?.includes('/auth/');
+    if (!isAuth) {
+      localStorage.removeItem('rs_token');
+      localStorage.removeItem('rs_user');
+      window.location.href = '/login';
+    }
+  }
+  return r;
+}, err => Promise.reject(err));
 export default api;

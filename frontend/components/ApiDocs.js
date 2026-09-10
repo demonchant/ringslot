@@ -1,11 +1,11 @@
 import Link from 'next/link';
 
 const ENDPOINTS = [
-  { method:'GET',  path:'/api/services',      desc:'List all services with pricing' },
+  { method:'GET',  path:'/api/services',      desc:'List configured services' },
   { method:'POST', path:'/api/orders/buy',     desc:'Purchase a number — body: {service, country}' },
   { method:'GET',  path:'/api/orders/sms',     desc:'Poll for OTP — ?id=orderId' },
   { method:'POST', path:'/api/orders/cancel',  desc:'Cancel & refund — body: {id}' },
-  { method:'POST', path:'/api/orders/rent',    desc:'Rent a number — body: {service, country, duration}' },
+  { method:'GET',  path:'/api/orders',         desc:'List your 50 most recent orders' },
   { method:'GET',  path:'/api/wallet/balance', desc:'Get current balance' },
 ];
 
@@ -38,7 +38,7 @@ export default function ApiDocs() {
   -d '{"service":"telegram","country":"any"}'`}</pre>
             </div>
 
-            <Link href="/api-docs"><button className="btn-purple">View full API docs →</button></Link>
+            <Link href="/register"><button className="btn-purple">Create an API account →</button></Link>
           </div>
 
           <div>

@@ -1,56 +1,35 @@
 const STEPS = [
-  { 
-    n: '01', 
-    title: 'Choose Service', 
-    desc: 'Select from 200+ global platforms including Telegram, WhatsApp, and Amazon.',
-    icon: '🎯'
-  },
-  { 
-    n: '02', 
-    title: 'Select Country', 
-    desc: 'Pick a region or specific area code. We offer numbers from 170+ countries.',
-    icon: '🌍'
-  },
-  { 
-    n: '03', 
-    title: 'Instant Delivery', 
-    desc: 'Receive your number immediately. Our system is built for speed and uptime.',
-    icon: '⚡'
-  },
-  { 
-    n: '04', 
-    title: 'Get Verified', 
-    desc: 'Receive your SMS code in real-time. Transparent pricing, no hidden fees.',
-    icon: '✅'
-  }
+  { n:'01', icon:'👤', title:'Create account', desc:'Sign up free in 30 seconds. Email only, no credit card required.' },
+  { n:'02', icon:'💰', title:'Deposit crypto', desc:'Fund with USDT, BTC, ETH, LTC and more. Minimum $20.' },
+  { n:'03', icon:'📱', title:'Pick your number', desc:'Select a service and country. A one-time activation number is issued when inventory is available.' },
+  { n:'04', icon:'✅', title:'Receive OTP', desc:'Code appears on your dashboard in seconds. Auto-refund if it fails.' },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" style={{ padding: '120px 0', background: '#fff' }}>
+    <section style={{ padding:'96px 0', background:'var(--slate-50)' }}>
       <div className="wrap">
-        <div style={{ textAlign: 'center', marginBottom: 80 }}>
-          <div className="section-tag">The Process</div>
-          <h2 className="section-h2">Getting started is simple</h2>
-          <p className="section-lead" style={{ margin: '0 auto' }}>Four small steps to your new secure identity.</p>
+        <div style={{ textAlign:'center', marginBottom:64 }}>
+          <div className="section-tag" style={{ display:'inline-flex' }}>How it works</div>
+          <h2 className="section-h2" style={{ marginBottom:16 }}>Four steps to your OTP</h2>
+          <p className="section-lead" style={{ margin:'0 auto' }}>Get your verification code in under 60 seconds</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 32, position: 'relative' }}>
-          {/* Connector line for desktop */}
-          <div style={{ position: 'absolute', top: '24%', left: '10%', right: '10%', height: 2, background: 'linear-gradient(90deg, transparent 0%, var(--primary-100) 20%, var(--primary-100) 80%, transparent 100%)', zIndex: 0, display: 'none', lg: 'block' }} />
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))', gap:4, position:'relative' }}>
+          {/* Connecting line */}
+          <div className="hide-mobile" style={{ position:'absolute', top:52, left:'12.5%', right:'12.5%', height:1, background:'linear-gradient(90deg,transparent,var(--primary-200),var(--primary-200),transparent)', zIndex:0 }} />
 
-          {STEPS.map((s, i) => (
-            <div key={s.n} style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-              <div style={{ width: 84, height: 84, borderRadius: 28, background: '#fff', border: '2px solid var(--slate-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 28px', boxShadow: '0 12px 32px rgba(0,0,0,0.03)', transition: 'all .3s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary-300)'; e.currentTarget.style.transform = 'translateY(-8px) rotate(4deg)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(147,51,234,0.12)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--slate-100)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.03)'; }}>
-                {s.icon}
-                <div style={{ position: 'absolute', top: -14, right: -14, width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-600)', color: '#fff', fontSize: 13, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid #fff' }}>
-                  {s.n}
-                </div>
+          {STEPS.map(({ n, icon, title, desc }, i) => (
+            <div key={n} style={{ background:'#fff', border:'1px solid var(--slate-100)', borderRadius:20, padding:32, textAlign:'center', position:'relative', zIndex:1, boxShadow:'0 2px 8px rgba(0,0,0,0.04)', transition:'box-shadow .2s, transform .2s' }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow='0 12px 40px rgba(147,51,234,0.1)'; e.currentTarget.style.transform='translateY(-4px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'; e.currentTarget.style.transform='none'; }}>
+              {/* Step circle */}
+              <div style={{ width:56, height:56, borderRadius:'50%', background:'var(--primary-600)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', boxShadow:'0 8px 24px rgba(147,51,234,0.35)' }}>
+                <span style={{ fontSize:22 }}>{icon}</span>
               </div>
-              <h3 className="font-display" style={{ fontSize: 22, fontWeight: 800, marginBottom: 12, color: 'var(--slate-900)' }}>{s.title}</h3>
-              <p style={{ fontSize: 15, color: 'var(--slate-500)', lineHeight: 1.6, padding: '0 20px' }}>{s.desc}</p>
+              <div style={{ fontSize:10, fontWeight:700, color:'var(--primary-400)', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:10 }}>{n}</div>
+              <h3 className="font-display" style={{ fontSize:18, fontWeight:700, color:'var(--slate-900)', marginBottom:10 }}>{title}</h3>
+              <p style={{ fontSize:14, color:'var(--slate-500)', lineHeight:1.7 }}>{desc}</p>
             </div>
           ))}
         </div>

@@ -1,7 +1,19 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = {
   reactStrictMode: true,
-  output: "standalone"
+  agentRules: false,
+  async redirects() {
+    return [
+      { source: '/virtual-number', destination: '/virtual-phone-number', permanent: true },
+      { source: '/get-virtual-number', destination: '/virtual-phone-number', permanent: true },
+      { source: '/where-to-get-a-virtual-number', destination: '/virtual-phone-number', permanent: true },
+    ];
+  },
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      { protocol:'https', hostname:'api.qrserver.com' },
+      { protocol:'https', hostname:'quickchart.io' },
+    ],
+  },
 };
-
-module.exports = nextConfig;

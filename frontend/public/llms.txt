@@ -1,13 +1,43 @@
-# RingSlot - Professional Virtual Phone Numbers
+# RingSlot
 
-RingSlot provides high-intent virtual phone numbers for instant SMS verification in over 170 countries. 
-Optimized for developers and privacy-conscious users.
+> RingSlot provides one-time virtual phone number activations for legitimate SMS verification, privacy, authorized business workflows, and software testing. Availability varies by service, country, carrier, and upstream provider.
 
-## Key Services
-- Telegram Verification
-- WhatsApp Verification
-- Google Account Creation
-- Crypto Payments (BTC, ETH, SOL, USDT)
+Canonical website: https://ringslot.shop/
 
-## API Access
-Full REST API available at /api. Documentation at /api-docs.
+## Primary pages
+
+- [About](https://ringslot.shop/about): What RingSlot is and who it is for
+- [Virtual phone number guide](https://ringslot.shop/virtual-phone-number): How to choose and request a one-time SMS activation
+- [Services](https://ringslot.shop/services): Public service directory
+- [Countries](https://ringslot.shop/countries): Public country directory
+- [Pricing](https://ringslot.shop/pricing): Pricing model and activation information
+- [API documentation](https://ringslot.shop/api-docs): Supported REST endpoints and authentication
+- [Knowledge base](https://ringslot.shop/knowledge-base): Product guides
+- [FAQ](https://ringslot.shop/faq): Common questions
+- [Live status](https://ringslot.shop/status): Production health checks
+- [Contact](https://ringslot.shop/contact): Support contact form
+
+## Policies
+
+- [Terms](https://ringslot.shop/terms)
+- [Privacy](https://ringslot.shop/privacy)
+- [Acceptable use](https://ringslot.shop/acceptable-use)
+- [Refund policy](https://ringslot.shop/refund-policy)
+- [Security](https://ringslot.shop/security)
+
+## Verified product facts
+
+- One-time activation numbers are offered; long-term rentals are not currently available.
+- Configured catalog: dozens of services and 90+ selectable countries.
+- Displayed starting price: $0.10; actual prices and inventory vary.
+- Minimum wallet deposit: $20 USD equivalent.
+- Eligible activations that remain without an SMS for the 10-minute activation window are automatically refunded to the RingSlot wallet.
+- Cryptocurrency options are supplied by the connected payment processor and shown on the deposit screen.
+- API authentication supports `X-API-Key` and authenticated web sessions use bearer tokens.
+- RingSlot is not affiliated with third-party brands shown in its directory.
+
+## Responsible-use boundary
+
+Users must comply with law, RingSlot policies, and the rules of the third-party platform involved. Fraud, impersonation, spam, unauthorized access, ban evasion, and attempts to defeat safety controls are prohibited.
+
+Support: support@ringslot.shop

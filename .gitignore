@@ -1,0 +1,26 @@
+# Dependencies and generated output
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+coverage/
+dist/
+*.log
+
+# Never commit environment configuration, including examples
+.env
+.env.*
+**/.env
+**/.env.*
+.env.example
+**/.env.example
+
+# Local editor and operating-system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local tooling
+.codex/
+.agents/
