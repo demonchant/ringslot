@@ -7,7 +7,7 @@
 services:
   # ── Web Service: API ─────────────────────────────────────────
   - type: web
-    name: ringslot-api
+    name: ringslot-backend
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
@@ -17,11 +17,6 @@ services:
     numInstances: 1
     autoDeploy: false
     healthCheckPath: /api/health
-    scaling:
-      minInstances: 1
-      maxInstances: 3
-      targetMemoryPercent: 75
-      targetCPUPercent: 70
     envVars:
       - key: NODE_ENV
         value: production
@@ -29,8 +24,6 @@ services:
         value: "4000"
       - key: REQUIRE_DEVICE_VERIFICATION
         value: "true"
-      - key: SUPERADMIN_EMAIL
-        fromGroup: ringslot-config
       - key: DATABASE_URL
         fromDatabase:
           name: ringslot-db
@@ -40,32 +33,12 @@ services:
           name: ringslot-redis
           type: redis
           property: connectionString
-      - key: JWT_SECRET
-        fromGroup: ringslot-secrets
-      - key: FRONTEND_URL
-        fromGroup: ringslot-config
-      - key: BACKEND_URL
-        fromGroup: ringslot-config
-      - key: SMSACTIVATE_API_KEY
-        fromGroup: ringslot-secrets
-      - key: FIVESIM_API_KEY
-        fromGroup: ringslot-secrets
-      - key: SMSMAN_API_KEY
-        fromGroup: ringslot-secrets
       - key: PRIMARY_PROVIDER
         value: smsman
       - key: SMSMAN_CURRENCY
         value: USD
-      - key: NOWPAYMENTS_API_KEY
-        fromGroup: ringslot-secrets
-      - key: NOWPAYMENTS_IPN_SECRET
-        fromGroup: ringslot-secrets
-      - key: RESEND_API_KEY
-        fromGroup: ringslot-secrets
-      - key: RESEND_FROM_EMAIL
-        fromGroup: ringslot-config
-      - key: SUPPORT_EMAIL
-        fromGroup: ringslot-config
+      - fromGroup: ringslot-secrets
+      - fromGroup: ringslot-config
 
   - type: redis
     name: ringslot-redis
