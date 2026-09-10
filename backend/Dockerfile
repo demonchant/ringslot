@@ -40,6 +40,8 @@ COPY --from=builder --chown=ringslot:ringslot /app/node_modules ./node_modules
 
 # Copy application source
 COPY --from=builder --chown=ringslot:ringslot /app/src ./src
+COPY --from=builder --chown=ringslot:ringslot /app/scripts ./scripts
+COPY --from=builder --chown=ringslot:ringslot /app/schema.sql ./schema.sql
 COPY --from=builder --chown=ringslot:ringslot /app/package.json ./package.json
 
 # Set environment

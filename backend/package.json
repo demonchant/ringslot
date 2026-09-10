@@ -10,6 +10,7 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "build": "node scripts/validate.js",
+    "migrate": "node scripts/migrate.js",
     "test": "node --test",
     "smoke:access": "node scripts/smoke-access-control.js"
   },

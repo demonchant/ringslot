@@ -6,7 +6,7 @@ RingSlot is a monorepo containing the public Next.js website and the private Nod
 
 - `frontend/` — Next.js website and customer/owner interfaces
 - `backend/` — Express API, supplier integrations, workers, and tests
-- `schema.sql` — PostgreSQL schema
+- `backend/schema.sql` — PostgreSQL schema
 - `render.yaml` — Render backend infrastructure blueprint
 - `docker-compose.dev.yml` — local PostgreSQL and Redis services
 

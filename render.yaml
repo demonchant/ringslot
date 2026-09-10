@@ -17,6 +17,7 @@ services:
     numInstances: 1
     autoDeploy: false
     healthCheckPath: /api/health
+    preDeployCommand: node scripts/migrate.js
     envVars:
       - key: NODE_ENV
         value: production

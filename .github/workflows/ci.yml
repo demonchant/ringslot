@@ -95,7 +95,7 @@ jobs:
         run: npm ci
 
       - name: Initialize database schema
-        run: psql "$DATABASE_URL" -f schema.sql
+        run: psql "$DATABASE_URL" -f backend/schema.sql
 
       - name: Run build
         working-directory: backend

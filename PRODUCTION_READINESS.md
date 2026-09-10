@@ -10,7 +10,7 @@
 
 ## Required before accepting real users
 
-1. Apply `schema.sql` to a new PostgreSQL database. For an existing database, apply `backend/migrations/001_contact_messages.sql` and verify all tables in `schema.sql` exist.
+1. Render applies `backend/schema.sql` with the backend pre-deploy migration command. For another host, run `npm.cmd run migrate` from `backend`. For an existing database, verify all tables in `backend/schema.sql` exist.
 2. Set every production variable documented in `backend/.env.example`. Use strong, unique values. Never commit real secrets.
 3. Fund and test each enabled SMS provider. Disable integrations without a valid key or compatible service/country mapping.
 4. Configure NOWPayments production credentials and its IPN callback as `https://ringslot-backend.onrender.com/api/wallet/webhook`. Run a small real deposit and verify exactly one wallet credit.
