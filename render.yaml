@@ -50,7 +50,7 @@ services:
 # ── Database: PostgreSQL ───────────────────────────────────────
 databases:
   - name: ringslot-db
-    plan: starter
+    plan: 0.1c-256mb
     region: oregon
     databaseName: ringslot
     user: ringslot
