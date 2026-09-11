@@ -34,6 +34,54 @@ async function deviceTablesOK() {
   return _tablesOK;
 }
 
+function deviceVerificationRequired() {
+  // Production authentication must never become password-only because of a
+  // missing or incorrectly set environment flag. Local development can still
+  // opt out explicitly.
+  return process.env.NODE_ENV === 'production' || process.env.REQUIRE_DEVICE_VERIFICATION !== 'false';
+}
+
+async function issueDeviceVerification({ user, req, isFirstLogin }) {
+  const ip = (req.headers['x-forwarded-for'] || req.ip || 'unknown').split(',')[0].trim();
+  const ua = req.headers['user-agent'] || '';
+  const deviceHash = hashDevice(ip, ua);
+  const deviceLabel = parseDeviceLabel(ua);
+
+  await query(
+    `INSERT INTO user_devices (user_id, device_hash, ip_address, user_agent, label, verified)
+     VALUES ($1, $2, $3, $4, $5, FALSE)
+     ON CONFLICT (user_id, device_hash)
+     DO UPDATE SET ip_address = EXCLUDED.ip_address,
+                   user_agent = EXCLUDED.user_agent,
+                   last_seen_at = NOW()`,
+    [user.id, deviceHash, ip, ua, deviceLabel]
+  );
+
+  await query('DELETE FROM login_tokens WHERE user_id = $1 AND device_hash = $2', [user.id, deviceHash]);
+  const verifyToken = generateToken(32);
+  await query(
+    `INSERT INTO login_tokens (user_id, token, device_hash, ip_address, user_agent, expires_at)
+     VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '15 minutes')`,
+    [user.id, verifyToken, deviceHash, ip, ua]
+  );
+
+  const delivery = await sendLoginVerificationEmail({
+    to: user.email,
+    token: verifyToken,
+    deviceLabel,
+    ip,
+    isFirstLogin,
+  });
+  if (!delivery.ok) {
+    await query('DELETE FROM login_tokens WHERE token = $1', [verifyToken]);
+    logger.warn('Verification email failed', { userId: user.id, error: delivery.error || 'Email provider not configured' });
+    return { ok: false };
+  }
+
+  logger.info('Verification email sent', { userId: user.id, isFirstLogin, device: deviceLabel });
+  return { ok: true };
+}
+
 const BLOCKED_DOMAINS = new Set([
   'mailinator.com','guerrillamail.com','tempmail.com','throwam.com',
   'sharklasers.com','yopmail.com','fakeinbox.com','mailnull.com',
@@ -76,13 +124,28 @@ export async function register(req, res) {
 
     logger.info('New user registered', { userId: user.id, email: user.email });
 
-    // Send welcome email from noreply@ringslot.shop
-    sendWelcomeEmail({ to: user.email })
-      .then(r => {
-        if (r.ok) logger.info('Welcome email sent', { userId: user.id });
-        else logger.warn('Welcome email failed', { userId: user.id, error: r.error });
-      })
-      .catch(err => logger.warn('Welcome email error', { error: err.message }));
+    if (deviceVerificationRequired()) {
+      if (!(await deviceTablesOK())) {
+        return res.status(503).json({
+          accountCreated: true,
+          error: 'Your account was created, but email verification is temporarily unavailable. Please try signing in shortly.',
+        });
+      }
+      const delivery = await issueDeviceVerification({ user, req, isFirstLogin: true });
+      if (!delivery.ok) {
+        return res.status(503).json({
+          accountCreated: true,
+          error: 'Your account was created, but the verification email could not be sent. Please try signing in again shortly.',
+        });
+      }
+      return res.status(202).json({
+        requiresVerification: true,
+        isFirstLogin: true,
+        message: 'Check your email to confirm your account and sign in.',
+      });
+    }
+
+    sendWelcomeEmail({ to: user.email }).catch(err => logger.warn('Welcome email error', { error: err.message }));
 
     return res.status(201).json({
       token:  makeJWT(user),
@@ -115,7 +178,7 @@ export async function login(req, res) {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
-    if (process.env.REQUIRE_DEVICE_VERIFICATION === 'false') {
+    if (!deviceVerificationRequired()) {
       return res.json({
         token: makeJWT(user),
         apiKey: user.api_key,
@@ -123,15 +186,10 @@ export async function login(req, res) {
       });
     }
 
-    // Skip device check if tables aren't set up yet
     const canVerify = await deviceTablesOK();
     if (!canVerify) {
-      logger.warn('Device verification skipped — tables missing', { userId: user.id });
-      return res.json({
-        token:  makeJWT(user),
-        apiKey: user.api_key,
-        user:   { id: user.id, email: user.email, role: user.role },
-      });
+      logger.error('Login blocked because device verification tables are unavailable', { userId: user.id });
+      return res.status(503).json({ error: 'Email verification is temporarily unavailable. Please try again shortly.' });
     }
 
     // Fingerprint this device
@@ -162,34 +220,10 @@ export async function login(req, res) {
       });
     }
 
-    // New or unverified device — send verification email
-    await query(
-      `INSERT INTO user_devices (user_id, device_hash, ip_address, user_agent, label, verified)
-       VALUES ($1, $2, $3, $4, $5, FALSE)
-       ON CONFLICT (user_id, device_hash)
-       DO UPDATE SET ip_address = EXCLUDED.ip_address,
-                     user_agent = EXCLUDED.user_agent,
-                     last_seen_at = NOW()`,
-      [user.id, deviceHash, ip, ua, deviceLabel]
-    );
-
-    // Delete old tokens for this device, create fresh one
-    await query('DELETE FROM login_tokens WHERE user_id = $1 AND device_hash = $2', [user.id, deviceHash]);
-
-    const verifyToken = generateToken(32);
-    await query(
-      `INSERT INTO login_tokens (user_id, token, device_hash, ip_address, user_agent, expires_at)
-       VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '15 minutes')`,
-      [user.id, verifyToken, deviceHash, ip, ua]
-    );
-
-    // Send verification email — non-blocking
-    sendLoginVerificationEmail({ to: user.email, token: verifyToken, deviceLabel, ip, isFirstLogin })
-      .then(r => {
-        if (r.ok) logger.info('Verification email sent', { userId: user.id, isFirstLogin, device: deviceLabel });
-        else logger.warn('Verification email failed', { userId: user.id, error: r.error });
-      })
-      .catch(err => logger.warn('Verification email error', { error: err.message }));
+    const delivery = await issueDeviceVerification({ user, req, isFirstLogin });
+    if (!delivery.ok) {
+      return res.status(503).json({ error: 'Verification email could not be sent. Please try again shortly.' });
+    }
 
     return res.status(202).json({
       requiresVerification: true,
@@ -207,7 +241,7 @@ export async function login(req, res) {
 // ── Verify device (email link click) ─────────────────────────
 export async function verifyDevice(req, res) {
   const { token } = req.params;
-  const FRONTEND  = process.env.FRONTEND_URL || 'https://ringslot.shop';
+  const FRONTEND  = process.env.FRONTEND_URL || 'https://www.ringslot.shop';
   if (!token) return res.redirect(`${FRONTEND}/login?verify=invalid`);
 
   try {
@@ -238,7 +272,7 @@ export async function verifyDevice(req, res) {
     return res.redirect(`${FRONTEND}/auth/callback#jwt=${jwtToken}`);
   } catch (err) {
     logger.error('verifyDevice error', { error: err.message });
-    return res.redirect(`${process.env.FRONTEND_URL || 'https://ringslot.shop'}/login?verify=error`);
+    return res.redirect(`${process.env.FRONTEND_URL || 'https://www.ringslot.shop'}/login?verify=error`);
   }
 }
 

@@ -82,7 +82,7 @@ envVarGroups:
   - name: ringslot-config
     envVars:
       - key: FRONTEND_URL
-        value: https://ringslot.shop
+        value: https://www.ringslot.shop
       - key: BACKEND_URL
         value: https://ringslot-backend.onrender.com
       - key: RESEND_FROM_EMAIL

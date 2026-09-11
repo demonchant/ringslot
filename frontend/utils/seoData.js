@@ -98,7 +98,7 @@ export const COUNTRIES = [
   { slug: 'kazakhstan', name: 'Kazakhstan', flag: '🇰🇿', iso: 'KZ', services: 440, phoneCode: '+7', format: '+7 XXX XXX XX XX' },
 ];
 
-export const BASE_URL = 'https://ringslot.shop';
+export const BASE_URL = 'https://www.ringslot.shop';
 
 export function getServiceBySlug(slug) {
   return SERVICES.find(s => s.slug === slug) || null;

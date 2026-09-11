@@ -3,41 +3,6 @@ Allow: /
 Allow: /llms.txt
 Allow: /llms-full.txt
 Allow: /sitemap.xml
-Disallow: /dashboard
-Disallow: /admin
-Disallow: /deposit
-Disallow: /auth/
 Disallow: /api/
 
-Sitemap: https://ringslot.shop/sitemap.xml
-
-# AI crawlers — full access to public content
-User-agent: GPTBot
-Allow: /
-Allow: /llms.txt
-Allow: /llms-full.txt
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-Allow: /llms.txt
-Allow: /llms-full.txt
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-Allow: /llms.txt
-Allow: /llms-full.txt
-
-User-agent: Googlebot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
+Sitemap: https://www.ringslot.shop/sitemap.xml

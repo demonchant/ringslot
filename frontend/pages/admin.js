@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Navbar from '../components/Navbar';
 import AdminSupport from '../components/AdminSupport';
@@ -91,10 +92,11 @@ export default function Admin() {
     } catch (error) { setMessage(error.response?.data?.error || 'Could not record withdrawal'); }
   }
 
-  if (!currentUser) return <div className="page"><Navbar /><main style={{ padding: '8rem 1.5rem', textAlign: 'center' }}>Loading secure workspace…</main></div>;
+  if (!currentUser) return <div className="page"><Head><title>Administration — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head><Navbar /><main style={{ padding: '8rem 1.5rem', textAlign: 'center' }}>Loading secure workspace…</main></div>;
 
   return (
     <div className="page">
+      <Head><title>Administration — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head>
       <Navbar />
       <main style={{ maxWidth: 1200, margin: '0 auto', padding: '6.5rem 1.5rem 3rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 24 }}>

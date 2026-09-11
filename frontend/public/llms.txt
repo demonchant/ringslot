@@ -2,28 +2,28 @@
 
 > RingSlot provides one-time virtual phone number activations for legitimate SMS verification, privacy, authorized business workflows, and software testing. Availability varies by service, country, carrier, and upstream provider.
 
-Canonical website: https://ringslot.shop/
+Canonical website: https://www.ringslot.shop/
 
 ## Primary pages
 
-- [About](https://ringslot.shop/about): What RingSlot is and who it is for
-- [Virtual phone number guide](https://ringslot.shop/virtual-phone-number): How to choose and request a one-time SMS activation
-- [Services](https://ringslot.shop/services): Public service directory
-- [Countries](https://ringslot.shop/countries): Public country directory
-- [Pricing](https://ringslot.shop/pricing): Pricing model and activation information
-- [API documentation](https://ringslot.shop/api-docs): Supported REST endpoints and authentication
-- [Knowledge base](https://ringslot.shop/knowledge-base): Product guides
-- [FAQ](https://ringslot.shop/faq): Common questions
-- [Live status](https://ringslot.shop/status): Production health checks
-- [Contact](https://ringslot.shop/contact): Support contact form
+- [About](https://www.ringslot.shop/about): What RingSlot is and who it is for
+- [Virtual phone number guide](https://www.ringslot.shop/virtual-phone-number): How to choose and request a one-time SMS activation
+- [Services](https://www.ringslot.shop/services): Public service directory
+- [Countries](https://www.ringslot.shop/countries): Public country directory
+- [Pricing](https://www.ringslot.shop/pricing): Pricing model and activation information
+- [API documentation](https://www.ringslot.shop/api-docs): Supported REST endpoints and authentication
+- [Knowledge base](https://www.ringslot.shop/knowledge-base): Product guides
+- [FAQ](https://www.ringslot.shop/faq): Common questions
+- [Live status](https://www.ringslot.shop/status): Production health checks
+- [Contact](https://www.ringslot.shop/contact): Support contact form
 
 ## Policies
 
-- [Terms](https://ringslot.shop/terms)
-- [Privacy](https://ringslot.shop/privacy)
-- [Acceptable use](https://ringslot.shop/acceptable-use)
-- [Refund policy](https://ringslot.shop/refund-policy)
-- [Security](https://ringslot.shop/security)
+- [Terms](https://www.ringslot.shop/terms)
+- [Privacy](https://www.ringslot.shop/privacy)
+- [Acceptable use](https://www.ringslot.shop/acceptable-use)
+- [Refund policy](https://www.ringslot.shop/refund-policy)
+- [Security](https://www.ringslot.shop/security)
 
 ## Verified product facts
 

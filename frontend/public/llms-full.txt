@@ -1,6 +1,6 @@
 # RingSlot: expanded reference
 
-Canonical source: https://ringslot.shop/
+Canonical source: https://www.ringslot.shop/
 
 RingSlot is a web service for purchasing one-time virtual phone number activations and receiving an SMS verification code through an authenticated dashboard or REST API. It is intended for legitimate privacy, authorized operations, customer-support workflows, and QA/testing. It must not be represented as a way to bypass platform rules or safety controls.
 

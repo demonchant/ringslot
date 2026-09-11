@@ -9,7 +9,7 @@ export default function PricingPage() {
       <Head>
         <title>Pricing — RingSlot Virtual Numbers</title>
         <meta name="description" content="Virtual phone numbers from $0.10 per activation. Pay only for completed orders, with automatic wallet refunds for eligible expired activations." />
-        <link rel="canonical" href="https://ringslot.shop/pricing" />
+        <link rel="canonical" href="https://www.ringslot.shop/pricing" />
       </Head>
       <div style={{ minHeight:'100vh', background:'#fafafa' }}>
         <Navbar />

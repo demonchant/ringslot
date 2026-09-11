@@ -24,7 +24,10 @@ export default function Hero() {
     setLoading(true); setError('');
     try {
       const res = await api.post('/auth/register', { email: form.email.trim().toLowerCase(), password: form.password });
-      if (res.status === 201 && res.data?.token) {
+      if (res.status === 202 && res.data?.requiresVerification) {
+        sessionStorage.setItem('rs_verification_email', form.email.trim().toLowerCase());
+        window.location.href = '/login?verification=sent';
+      } else if (res.status === 201 && res.data?.token) {
         localStorage.setItem('rs_token', res.data.token);
         localStorage.setItem('rs_user', JSON.stringify(res.data.user));
         window.location.href = '/dashboard';

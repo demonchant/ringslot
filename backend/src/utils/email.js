@@ -4,7 +4,7 @@ import logger from './logger.js';
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL     = process.env.RESEND_FROM_EMAIL || 'RingSlot <noreply@ringslot.shop>';
 const REPLY_TO       = process.env.SUPPORT_EMAIL     || 'support@ringslot.shop';
-const SITE_URL       = process.env.FRONTEND_URL      || 'https://ringslot.shop';
+const SITE_URL       = process.env.FRONTEND_URL      || 'https://www.ringslot.shop';
 const BACKEND_URL    = process.env.BACKEND_URL        || 'https://ringslot-backend.onrender.com';
 
 export async function sendEmail({ to, subject, html, text, replyTo }) {

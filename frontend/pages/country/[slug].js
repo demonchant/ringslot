@@ -84,7 +84,7 @@ export default function CountryPage({ country, countryServices }) {
   return (
     <>
       <Head>
-        <title>{country.name} Virtual Phone Number - {country.phoneCode} SMS Verification | RingSlot</title>
+        <title>{`${country.name} Virtual Phone Number - ${country.phoneCode} SMS Verification | RingSlot`}</title>
         <meta name="description" content={`Request a ${country.name} (${country.phoneCode}) virtual phone number for authorized SMS verification. Live service inventory and pricing are checked at purchase.`} />
         <meta name="keywords" content={`${country.name} virtual number, ${country.name} phone number, ${country.phoneCode} SMS verification, ${country.name} OTP, buy ${country.name} number`} />
         <link rel="canonical" href={`${BASE_URL}/country/${country.slug}`} />

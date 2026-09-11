@@ -85,7 +85,7 @@ export default function ServicePage({ service, serviceCountries }) {
   return (
     <>
       <Head>
-        <title>{service.name} SMS Verification - Virtual Number for {service.name} | RingSlot</title>
+        <title>{`${service.name} SMS Verification - Virtual Number for ${service.name} | RingSlot`}</title>
         <meta name="description" content={`Request a virtual phone number for authorized ${service.name} verification. Live country inventory and pricing are checked at purchase.`} />
         <meta name="keywords" content={`${service.name} verification, ${service.name} virtual number, ${service.name} OTP code, ${service.name} SMS, receive ${service.name} code online`} />
         <link rel="canonical" href={`${BASE_URL}/service/${service.slug}`} />

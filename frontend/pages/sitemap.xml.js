@@ -15,10 +15,9 @@ export async function getServerSideProps({ res }) {
     ...SERVICES.map(service => `/service/${service.slug}`),
     ...COUNTRIES.map(country => `/country/${country.slug}`),
   ];
-  const lastmod = new Date().toISOString().slice(0, 10);
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(path => `  <url><loc>${escapeXml(`${BASE_URL}${path}`)}</loc><lastmod>${lastmod}</lastmod></url>`).join('\n')}
+${urls.map(path => `  <url><loc>${escapeXml(`${BASE_URL}${path}`)}</loc></url>`).join('\n')}
 </urlset>`;
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=3600');

@@ -175,13 +175,13 @@ export default function Dashboard() {
     : rentDuration === '30' ? '1 Month'
     : rentDuration + ' Days';
 
-  if (!mounted) return null;
+  if (!mounted) return <Head><title>Dashboard — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head>;
 
   const tag = { fontSize:10, color:'var(--text-3)', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' };
 
   return (
     <div className="page">
-      <Head><title>Dashboard — RingSlot</title><meta name="robots" content="noindex"/></Head>
+      <Head><title>Dashboard — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head>
       <Navbar />
       <div className="wrap" style={{ paddingTop:108, paddingBottom:60 }}>
 

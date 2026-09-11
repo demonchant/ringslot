@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import LogoIcon from '../../components/LogoIcon';
 
@@ -33,6 +34,8 @@ export default function AuthCallback() {
   }, [router.isReady]);
 
   return (
+    <>
+    <Head><title>Verify Sign-in — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head>
     <div className="page" style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
       <div style={{ marginBottom:32, display:'flex', alignItems:'center', gap:10 }}>
         <LogoIcon size={36} />
@@ -67,5 +70,6 @@ export default function AuthCallback() {
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
+    </>
   );
 }

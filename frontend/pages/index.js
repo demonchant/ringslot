@@ -17,11 +17,11 @@ import Link from 'next/link';
 const SCHEMA = {
   '@context':'https://schema.org',
   '@graph':[
-    {'@type':'WebSite','@id':'https://ringslot.shop/#website',url:'https://ringslot.shop',name:'RingSlot',
+    {'@type':'WebSite','@id':'https://www.ringslot.shop/#website',url:'https://www.ringslot.shop',name:'RingSlot',
       description:'Virtual phone numbers for legitimate SMS verification, privacy, and software testing.'},
     {'@type':'Service',name:'RingSlot virtual number activations',serviceType:'Virtual phone number activation',
-      description:'One-time virtual number activations for SMS verification, subject to inventory and third-party platform rules.',url:'https://ringslot.shop'},
-    {'@type':'Organization',name:'RingSlot',url:'https://ringslot.shop',logo:'https://ringslot.shop/favicon.svg',
+      description:'One-time virtual number activations for SMS verification, subject to inventory and third-party platform rules.',url:'https://www.ringslot.shop'},
+    {'@type':'Organization',name:'RingSlot',url:'https://www.ringslot.shop',logo:'https://www.ringslot.shop/favicon.svg',
       contactPoint:{'@type':'ContactPoint',email:'support@ringslot.shop',contactType:'customer service',availableLanguage:'English'}},
   ],
 };
@@ -33,12 +33,12 @@ export default function Home() {
         <title>RingSlot — Virtual Phone Numbers for SMS Verification | From $0.10</title>
         <meta name="description" content="Request one-time virtual phone number activations across 90+ selectable countries and dozens of configured services. Prices from $0.10, subject to inventory." />
         <meta name="keywords" content="virtual phone number, receive SMS online, temporary phone number, OTP verification, disposable phone number, virtual number telegram" />
-        <link rel="canonical" href="https://ringslot.shop/" />
+        <link rel="canonical" href="https://www.ringslot.shop/" />
         <meta property="og:title" content="RingSlot — Virtual Phone Numbers for SMS Verification" />
         <meta property="og:description" content="90+ selectable countries and dozens of configured services. Pay crypto. From $0.10, subject to inventory." />
-        <meta property="og:url" content="https://ringslot.shop/" />
+        <meta property="og:url" content="https://www.ringslot.shop/" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://ringslot.shop/hero-backdrop.png" />
+        <meta property="og:image" content="https://www.ringslot.shop/hero-backdrop.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }} />

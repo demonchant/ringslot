@@ -23,7 +23,7 @@
 
 ## Search and AI discovery
 
-- Submit `https://ringslot.shop/sitemap.xml` in Google Search Console and Bing Webmaster Tools after the final domain is live.
+- Submit `https://www.ringslot.shop/sitemap.xml` in Google Search Console and Bing Webmaster Tools after the final domain is live.
 - Keep public claims synchronized with actual inventory and observed performance. Do not add fake reviews, uptime, delivery speed, affiliations, or structured-data ratings.
 - Publish genuinely useful, original guides and changelogs only when the team can maintain them. Search engines and answer engines reward reliable information and independent citations; no technical file can guarantee recommendations.
 - Earn relevant mentions through provider documentation, developer integrations, legitimate directories, customer case studies with permission, and useful open-source examples. Avoid bought links, doorway pages, review fabrication, and automated content spam.

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import api from '../utils/api';
@@ -120,12 +121,13 @@ export default function Deposit() {
     setStep('form'); setPayment(null); setStatus('waiting'); setError(''); setAmount('');
   }
 
-  if (!mounted) return null;
+  if (!mounted) return <Head><title>Deposit Funds — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head>;
 
   const sc = STATUS[status] || STATUS.waiting;
 
   return (
     <div className="page">
+      <Head><title>Deposit Funds — RingSlot</title><meta name="robots" content="noindex, nofollow" /></Head>
       <Navbar />
       <div className="wrap" style={{ paddingTop: 108, paddingBottom: 60, maxWidth: 600 }}>
 

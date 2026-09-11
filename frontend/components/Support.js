@@ -9,7 +9,8 @@ const FAQS = [
   { q:'Can I rent a number long-term?', a:'Not currently. RingSlot offers one-time activation numbers while a reliable long-term rental lifecycle is being developed.' },
 ];
 
-export default function Support() {
+export default function Support({ headingLevel = 'h2' }) {
+  const Heading = headingLevel;
   return (
     <section id="support" style={{ padding:'96px 0', background:'#fff' }}>
       <div className="wrap">
@@ -18,7 +19,7 @@ export default function Support() {
           {/* Left */}
           <div>
             <div className="section-tag" style={{ display:'inline-flex' }}>Support</div>
-            <h2 className="section-h2">Help when you need it</h2>
+            <Heading className="section-h2">Help when you need it</Heading>
             <p className="section-lead" style={{ marginBottom:32 }}>
               Send a detailed message and our support team will follow up by email.
             </p>
