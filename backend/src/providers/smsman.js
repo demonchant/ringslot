@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 const CATALOG_TTL_MS = 6 * 60 * 60 * 1000;
+const BALANCE_TTL_MS = 2 * 60 * 1000;
 const catalogCache = { applications: null, countries: null, expiresAt: 0 };
+const balanceCache = { value: null, expiresAt: 0 };
+
+function minimumApiBalance() {
+  const configured = Number(process.env.SMSMAN_MIN_API_BALANCE || 12);
+  return Number.isFinite(configured) && configured >= 0 ? configured : 12;
+}
 
 function apiKey() {
   const key = process.env.SMSMAN_API_KEY?.trim();
@@ -25,7 +32,23 @@ function assertSuccess(data) {
   if (data?.error_code || data?.success === false) {
     throw new Error(data.error_code || data.error_msg || 'SMS-Man request failed');
   }
+  if (data?.error) throw new Error(String(data.error));
   return data;
+}
+
+function catalogArray(data, kind) {
+  const result = assertSuccess(data);
+  if (Array.isArray(result)) return result;
+
+  const candidates = [result?.data, result?.result, result?.[kind]];
+  const catalog = candidates.find(Array.isArray);
+  if (catalog) return catalog;
+
+  const responseType = result === null ? 'null' : typeof result;
+  const keys = result && typeof result === 'object'
+    ? Object.keys(result).slice(0, 8).join(',')
+    : '';
+  throw new Error(`SMS-Man returned an invalid ${kind} catalog (${responseType}${keys ? `: ${keys}` : ''})`);
 }
 
 async function refreshCatalog(force = false) {
@@ -35,9 +58,8 @@ async function refreshCatalog(force = false) {
     api.get('/applications'),
     api.get('/countries'),
   ]);
-  const applications = assertSuccess(applicationsResponse.data);
-  const countries = assertSuccess(countriesResponse.data);
-  if (!Array.isArray(applications) || !Array.isArray(countries)) throw new Error('SMS-Man returned an invalid catalog');
+  const applications = catalogArray(applicationsResponse.data, 'applications');
+  const countries = catalogArray(countriesResponse.data, 'countries');
   catalogCache.applications = applications;
   catalogCache.countries = countries;
   catalogCache.expiresAt = Date.now() + CATALOG_TTL_MS;
@@ -92,6 +114,19 @@ export const smsMan = {
     return Boolean(process.env.SMSMAN_API_KEY?.trim());
   },
 
+  minimumApiBalance,
+
+  hasApiBalance(balance) {
+    return Number(balance) > minimumApiBalance();
+  },
+
+  async isReady() {
+    const balance = Date.now() < balanceCache.expiresAt
+      ? balanceCache.value
+      : await this.getBalance();
+    return this.hasApiBalance(balance);
+  },
+
   async getApplications({ force = false } = {}) {
     return (await refreshCatalog(force)).applications;
   },
@@ -104,6 +139,8 @@ export const smsMan = {
     const { data } = await client().get('/get-balance');
     const balance = Number(assertSuccess(data).balance);
     if (!Number.isFinite(balance)) throw new Error('SMS-Man returned an invalid balance');
+    balanceCache.value = balance;
+    balanceCache.expiresAt = Date.now() + BALANCE_TTL_MS;
     return balance;
   },
 

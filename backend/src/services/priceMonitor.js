@@ -10,8 +10,8 @@ import { createAlert, shouldAlert } from './alerting.js';
 // ── Provider map ──────────────────────────────────────────────
 const PROVIDERS = { smsactivate: smsActivate, fivesim: fiveSim, smsman: smsMan };
 
-const PRICE_REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
-const PRICE_CACHE_TTL = 600; // 10 minutes
+const PRICE_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const PRICE_CACHE_TTL = 300; // 5 minutes
 const PRICE_HISTORY_TTL = 30 * 86400; // 30 days retention
 const TOP_SERVICES_COUNT = 20;
 
@@ -21,14 +21,14 @@ let priceInterval = null;
 async function getTopServices(limit = TOP_SERVICES_COUNT) {
   try {
     const { rows } = await query(`
-      SELECT DISTINCT service_name
+      SELECT service
       FROM orders
       WHERE created_at >= NOW() - INTERVAL '30 days'
-      GROUP BY service_name
+      GROUP BY service
       ORDER BY COUNT(*) DESC
       LIMIT $1
     `, [limit]);
-    return rows.map((r) => r.service_name).filter(Boolean);
+    return rows.map((r) => r.service).filter(Boolean);
   } catch (err) {
     logger.error('Failed to fetch top services', { error: err.message });
     return [];
@@ -43,6 +43,21 @@ async function getEnabledProviderNames() {
   return rows.map((r) => r.provider_name);
 }
 
+async function getReadyProviderNames() {
+  const enabledNames = await getEnabledProviderNames();
+  const readyNames = [];
+  for (const name of enabledNames) {
+    const provider = PROVIDERS[name];
+    if (!provider || !provider.isConfigured()) continue;
+    try {
+      if (typeof provider.isReady !== 'function' || await provider.isReady()) readyNames.push(name);
+    } catch (err) {
+      logger.warn(`Price monitor: ${name} is not API-ready`, { error: err.message });
+    }
+  }
+  return readyNames;
+}
+
 // ── Refresh prices for all top services ───────────────────────
 export async function refreshPrices() {
   logger.info('Price monitor: refreshing prices');
@@ -53,7 +68,7 @@ export async function refreshPrices() {
     return;
   }
 
-  const enabledNames = await getEnabledProviderNames();
+  const enabledNames = await getReadyProviderNames();
   const now = new Date().toISOString();
   const dateKey = now.slice(0, 10); // YYYY-MM-DD
 
@@ -133,7 +148,7 @@ export async function comparePrices(service) {
   } catch {}
 
   // Fetch live prices
-  const enabledNames = await getEnabledProviderNames();
+  const enabledNames = await getReadyProviderNames();
   const prices = {};
 
   for (const providerName of enabledNames) {
@@ -247,7 +262,7 @@ export function startPriceMonitor() {
     clearInterval(priceInterval);
   }
 
-  logger.info('Price monitor started (10-minute interval)');
+  logger.info('Price monitor started (5-minute interval)');
 
   priceInterval = setInterval(async () => {
     try {

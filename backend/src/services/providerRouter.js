@@ -17,6 +17,20 @@ async function enabledProviders() {
     .filter((provider) => provider && (typeof provider.isConfigured !== 'function' || provider.isConfigured()));
 }
 
+async function onlyReadyProviders(providers) {
+  const checks = await Promise.all(providers.map(async (provider) => {
+    if (typeof provider.isReady !== 'function') return provider;
+    try {
+      return await provider.isReady() ? provider : null;
+    } catch (err) {
+      providerHealth.recordFailure(provider.name);
+      logger.warn(`Provider ${provider.name} is not API-ready`, { error: err.message });
+      return null;
+    }
+  }));
+  return checks.filter(Boolean);
+}
+
 async function getPrice(provider, service, country) {
   const key = `price:${provider.name}:${service}:${country}`;
   try {
@@ -44,7 +58,8 @@ function prioritizeProviders(providers) {
 
 async function purchaseProviders() {
   const providers = await enabledProviders();
-  const available = providers.filter((provider) => providerHealth.isAvailable(provider.name));
+  const ready = await onlyReadyProviders(providers);
+  const available = ready.filter((provider) => providerHealth.isAvailable(provider.name));
   if (!available.length) throw new Error('All providers temporarily unavailable');
   return prioritizeProviders(available);
 }

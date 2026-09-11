@@ -1,6 +1,11 @@
 import { query, getClient } from '../config/database.js';
 import logger from '../utils/logger.js';
 import { smsMan } from '../providers/smsman.js';
+import { fiveSim } from '../providers/fivesim.js';
+
+const CATALOG_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+let catalogInterval = null;
+let catalogSyncInProgress = false;
 
 const SERVICES = [
   ['telegram','Telegram',1.5],['whatsapp','WhatsApp',1.5],['viber','Viber',1.5],
@@ -40,7 +45,80 @@ const SERVICES = [
   ['naver','Naver',1.5],['truecaller','Truecaller',1.5],['github','GitHub',1.5],
 ];
 
-export async function seedServicesIfEmpty() {
+const LOCAL_SERVICE_KEYS = new Map(SERVICES.map(([key, name]) => [
+  name.toLowerCase().replace(/[^a-z0-9]+/g, ''),
+  key,
+]));
+
+function displayName(code) {
+  return String(code)
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function serviceKey(code, name) {
+  const normalizedName = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  return LOCAL_SERVICE_KEYS.get(normalizedName)
+    || String(code).toLowerCase().replace(/[^a-z0-9_-]/g, '-').slice(0, 100);
+}
+
+async function storeProviderCatalog(providerName, catalog) {
+  if (!catalog.length) throw new Error('Number supplier returned an empty service catalog');
+  let client;
+  try {
+    client = await getClient();
+    await client.query('BEGIN');
+    await client.query(
+      'UPDATE provider_services SET is_active = FALSE, updated_at = NOW() WHERE provider_name = $1',
+      [providerName]
+    );
+    for (const item of catalog) {
+      await client.query(
+        `INSERT INTO services (service_key, display_name, markup, is_active)
+         VALUES ($1, $2, 1.5, TRUE)
+         ON CONFLICT (service_key) DO UPDATE SET display_name = EXCLUDED.display_name, is_active = TRUE`,
+        [item.serviceKey, item.name]
+      );
+      await client.query(
+        `INSERT INTO provider_services
+           (provider_name, service_key, provider_service_id, provider_code, display_name, is_active, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (provider_name, provider_service_id) DO UPDATE SET
+           service_key = EXCLUDED.service_key,
+           provider_code = EXCLUDED.provider_code,
+           display_name = EXCLUDED.display_name,
+           is_active = EXCLUDED.is_active,
+           updated_at = NOW()`,
+        [providerName, item.serviceKey, item.id, item.code || null, item.name, item.active !== false]
+      );
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    if (client) await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client?.release();
+  }
+}
+
+async function syncFiveSimCatalog() {
+  const products = await fiveSim.getProducts('any');
+  const catalog = products.map((product) => {
+    const code = String(product.code || '').trim().toLowerCase();
+    const name = displayName(code);
+    return {
+      id: code,
+      code,
+      name,
+      serviceKey: serviceKey(code, name),
+      active: product.quantity > 0,
+    };
+  }).filter((product) => product.id && product.serviceKey);
+  await storeProviderCatalog('fivesim', catalog);
+  logger.info('Secondary service catalog synchronized', { serviceCount: catalog.length });
+}
+
+async function syncLocalAndPrimaryCatalog() {
   let client;
   try {
     await query(`CREATE TABLE IF NOT EXISTS provider_services (
@@ -68,6 +146,22 @@ export async function seedServicesIfEmpty() {
       return;
     }
 
+    try {
+      const balance = await smsMan.getBalance();
+      if (!smsMan.hasApiBalance(balance)) {
+        logger.warn(
+          `Services: ${SERVICES.length} local defaults available; SMS-Man catalog sync skipped (balance must be above $${smsMan.minimumApiBalance().toFixed(2)})`,
+          { balance }
+        );
+        return;
+      }
+    } catch (err) {
+      logger.warn(`Services: ${SERVICES.length} local defaults available; SMS-Man catalog sync skipped`, {
+        error: err.message,
+      });
+      return;
+    }
+
     const applications = await smsMan.getApplications({ force: true });
     const catalog = applications
       .map((app) => ({
@@ -78,7 +172,7 @@ export async function seedServicesIfEmpty() {
       .filter((app) => app.id && app.name)
       .map((app) => ({
         ...app,
-        serviceKey: (app.code || `smsman-${app.id}`).replace(/[^a-z0-9_-]/g, '-').slice(0, 100),
+        serviceKey: serviceKey(app.code || `service-${app.id}`, app.name),
       }));
 
     client = await getClient();
@@ -112,4 +206,37 @@ export async function seedServicesIfEmpty() {
   } finally {
     client?.release();
   }
+}
+
+export async function seedServicesIfEmpty() {
+  if (catalogSyncInProgress) return;
+  catalogSyncInProgress = true;
+  try {
+    await syncLocalAndPrimaryCatalog();
+    try {
+      await syncFiveSimCatalog();
+    } catch (err) {
+      logger.warn(`Secondary supplier catalog unavailable; ${SERVICES.length} local services remain available`, {
+        error: err.message,
+      });
+    }
+  } finally {
+    catalogSyncInProgress = false;
+  }
+}
+
+export function startServiceCatalogRefresh() {
+  if (catalogInterval) clearInterval(catalogInterval);
+  catalogInterval = setInterval(() => {
+    seedServicesIfEmpty().catch((err) => {
+      logger.warn('Scheduled service catalog refresh failed', { error: err.message });
+    });
+  }, CATALOG_REFRESH_INTERVAL_MS);
+  logger.info('Service catalog refresh started (5-minute interval)');
+  return catalogInterval;
+}
+
+export function stopServiceCatalogRefresh() {
+  if (catalogInterval) clearInterval(catalogInterval);
+  catalogInterval = null;
 }

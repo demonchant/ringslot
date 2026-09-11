@@ -25,8 +25,8 @@ export async function getReportData(startDate, endDate) {
     query(`
       SELECT
         COUNT(*)::int AS total_orders,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
-        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
+        COUNT(*) FILTER (WHERE status = 'received')::int AS completed,
+        COUNT(*) FILTER (WHERE status IN ('cancelled', 'expired', 'refunded'))::int AS failed,
         COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled,
         COUNT(*) FILTER (WHERE status = 'expired')::int AS expired,
         COUNT(*) FILTER (WHERE status = 'waiting')::int AS waiting
@@ -48,14 +48,14 @@ export async function getReportData(startDate, endDate) {
     // Top services
     query(`
       SELECT
-        service_name,
+        service,
         COUNT(*)::int AS order_count,
-        COALESCE(SUM(price), 0)::numeric(12,4) AS revenue,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
-        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed
+        COALESCE(SUM(user_price) FILTER (WHERE status = 'received'), 0)::numeric(12,4) AS revenue,
+        COUNT(*) FILTER (WHERE status = 'received')::int AS completed,
+        COUNT(*) FILTER (WHERE status IN ('cancelled', 'expired', 'refunded'))::int AS failed
       FROM orders
       WHERE created_at >= $1 AND created_at < $2::date + INTERVAL '1 day'
-      GROUP BY service_name
+      GROUP BY service
       ORDER BY order_count DESC
       LIMIT 20
     `, [startDate, endDate]),
@@ -65,8 +65,8 @@ export async function getReportData(startDate, endDate) {
       SELECT
         provider,
         COUNT(*)::int AS total_orders,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
-        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
+        COUNT(*) FILTER (WHERE status = 'received')::int AS completed,
+        COUNT(*) FILTER (WHERE status IN ('cancelled', 'expired', 'refunded'))::int AS failed,
         COALESCE(SUM(provider_price), 0)::numeric(12,4) AS total_cost,
         ROUND(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) * 1000))::int AS avg_latency_ms
       FROM orders
@@ -79,10 +79,10 @@ export async function getReportData(startDate, endDate) {
     // Recent failures for investigation
     query(`
       SELECT
-        id, service_name AS service, provider, status, created_at
+        id, service, provider, status, created_at
       FROM orders
       WHERE created_at >= $1 AND created_at < $2::date + INTERVAL '1 day'
-        AND status = 'failed'
+        AND status IN ('cancelled', 'expired', 'refunded')
       ORDER BY created_at DESC
       LIMIT 20
     `, [startDate, endDate]),
@@ -102,7 +102,7 @@ export async function getReportData(startDate, endDate) {
         COALESCE(SUM(amount), 0)::numeric(12,4) AS total_deposited
       FROM transactions
       WHERE created_at >= $1 AND created_at < $2::date + INTERVAL '1 day'
-        AND type = 'deposit' AND status = 'completed'
+        AND type = 'deposit'
     `, [startDate, endDate]),
   ]);
 
@@ -190,9 +190,9 @@ export async function generateWeeklyReport() {
       SELECT
         DATE(created_at) AS date,
         COUNT(*)::int AS orders,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
-        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
-        COALESCE(SUM(price), 0)::numeric(12,4) AS revenue
+        COUNT(*) FILTER (WHERE status = 'received')::int AS completed,
+        COUNT(*) FILTER (WHERE status IN ('cancelled', 'expired', 'refunded'))::int AS failed,
+        COALESCE(SUM(user_price) FILTER (WHERE status = 'received'), 0)::numeric(12,4) AS revenue
       FROM orders
       WHERE created_at >= $1 AND created_at < $2::date + INTERVAL '1 day'
       GROUP BY DATE(created_at)
@@ -205,7 +205,7 @@ export async function generateWeeklyReport() {
         DATE(created_at) AS date,
         provider,
         COUNT(*)::int AS orders,
-        COUNT(*) FILTER (WHERE status = 'failed')::int AS failures
+        COUNT(*) FILTER (WHERE status IN ('cancelled', 'expired', 'refunded'))::int AS failures
       FROM orders
       WHERE created_at >= $1 AND created_at < $2::date + INTERVAL '1 day'
         AND provider IS NOT NULL
@@ -247,7 +247,7 @@ function buildSummary(data) {
     ? ((orders.completed / orders.total_orders) * 100).toFixed(1)
     : '0.0';
 
-  const topService = topServices.length > 0 ? topServices[0].service_name : 'N/A';
+  const topService = topServices.length > 0 ? topServices[0].service : 'N/A';
 
   return {
     totalOrders: orders.total_orders,

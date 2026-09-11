@@ -31,11 +31,10 @@ export async function monitorProviders() {
   logger.info('Provider monitor: running health check');
 
   const enabledNames = await getEnabledProviderNames();
-  const allProviderNames = Object.keys(PROVIDERS);
 
-  for (const name of allProviderNames) {
+  for (const name of enabledNames) {
     const provider = PROVIDERS[name];
-    if (!provider) continue;
+    if (!provider || !provider.isConfigured()) continue;
 
     try {
       // Check balance
@@ -49,11 +48,16 @@ export async function monitorProviders() {
       await redis.setex(`intelligence:balance:${name}`, 300, String(balance));
 
       // Alert on low balance
-      if (balance < LOW_BALANCE_THRESHOLD) {
+      const providerMinimum = typeof provider.minimumApiBalance === 'function'
+        ? provider.minimumApiBalance()
+        : LOW_BALANCE_THRESHOLD;
+      if (balance <= providerMinimum) {
         if (await shouldAlert('low_balance', name)) {
-          await createAlert('warning', 'low_balance', `Provider ${name} balance is low: $${balance.toFixed(2)}`, {
+          await createAlert('warning', 'low_balance',
+            `Provider ${name} balance is $${balance.toFixed(2)}; API requires more than $${providerMinimum.toFixed(2)}`, {
             provider: name,
             balance,
+            requiredBalance: providerMinimum,
           });
         }
       }

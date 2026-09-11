@@ -11,8 +11,9 @@ test('SMS-Man resolves provider service and country IDs for price and number req
   axios.create = () => ({
     async get(path, config = {}) {
       calls.push({ path, params: config.params || {} });
-      if (path === '/applications') return { data: [{ id: '3', name: 'Telegram', code: 'tg' }] };
-      if (path === '/countries') return { data: [{ id: 187, title: 'United States' }] };
+      if (path === '/applications') return { data: { applications: [{ id: '3', name: 'Telegram', code: 'tg' }] } };
+      if (path === '/countries') return { data: { data: [{ id: 187, title: 'United States' }] } };
+      if (path === '/get-balance') return { data: { balance: '12.01' } };
       if (path === '/get-prices') return { data: { 187: { 3: { cost: '0.25', count: 12 } } } };
       if (path === '/get-number') return { data: { request_id: 99, number: '14246782048' } };
       throw new Error(`Unexpected path: ${path}`);
@@ -21,6 +22,9 @@ test('SMS-Man resolves provider service and country IDs for price and number req
 
   try {
     const { smsMan } = await import('../src/providers/smsman.js');
+    assert.equal(smsMan.hasApiBalance(12), false);
+    assert.equal(smsMan.hasApiBalance(12.01), true);
+    assert.equal(await smsMan.isReady(), true);
     const price = await smsMan.getPrices('tg', 'us');
     const number = await smsMan.getNumber('tg', 'us');
 

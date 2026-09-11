@@ -4,17 +4,15 @@ import { applyMarkup } from '../services/markupEngine.js';
 import logger from '../utils/logger.js';
 
 export async function listServices(req, res) {
-  let rows;
-  if ((process.env.PRIMARY_PROVIDER || 'smsman') === 'smsman') {
-    const result = await query(`
-      SELECT s.service_key, s.display_name
-      FROM services s
-      JOIN provider_services ps ON ps.service_key = s.service_key
-      WHERE s.is_active = TRUE AND ps.provider_name = 'smsman' AND ps.is_active = TRUE
-      ORDER BY s.display_name
-    `);
-    rows = result.rows;
-  }
+  const available = await query(`
+    SELECT DISTINCT s.service_key, s.display_name
+    FROM services s
+    JOIN provider_services ps ON ps.service_key = s.service_key
+    JOIN providers p ON p.provider_name = ps.provider_name
+    WHERE s.is_active = TRUE AND ps.is_active = TRUE AND p.enabled = TRUE
+    ORDER BY s.display_name
+  `);
+  let rows = available.rows;
   if (!rows?.length) {
     const result = await query(
       'SELECT service_key, display_name FROM services WHERE is_active = TRUE ORDER BY display_name'

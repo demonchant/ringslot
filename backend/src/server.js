@@ -10,7 +10,11 @@ import logger from './utils/logger.js';
 import pool from './config/database.js';
 import redis from './config/redis.js';
 import { startPoller, recoverPending } from './services/otpPoller.js';
-import { seedServicesIfEmpty } from './services/seedServices.js';
+import {
+  seedServicesIfEmpty,
+  startServiceCatalogRefresh,
+  stopServiceCatalogRefresh,
+} from './services/seedServices.js';
 import { startBackgroundJobs, stopBackgroundJobs } from './services/backgroundJobs.js';
 import { startProviderMonitor, stopProviderMonitor } from './services/providerMonitor.js';
 import { startPriceMonitor, stopPriceMonitor } from './services/priceMonitor.js';
@@ -87,6 +91,7 @@ async function boot() {
     await recoverPending();
     startBackgroundJobs();
     if (process.env.ENABLE_PROVIDER_MONITORS !== 'false') {
+      startServiceCatalogRefresh();
       startProviderMonitor();
       startPriceMonitor();
     } else {
@@ -114,6 +119,7 @@ async function gracefulShutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully`);
 
   stopBackgroundJobs();
+  stopServiceCatalogRefresh();
   stopProviderMonitor();
   stopPriceMonitor();
 

@@ -291,7 +291,15 @@ ON CONFLICT (service_key) DO NOTHING;
 
 -- Default providers
 INSERT INTO providers (provider_name, api_key, base_url, priority) VALUES
-  ('smsactivate', 'SMSACTIVATE_API_KEY_PLACEHOLDER', 'https://api.sms-activate.io/stubs/handler_api.php', 2),
+  ('smsactivate', 'SMSACTIVATE_API_KEY_PLACEHOLDER', 'https://sms-activate.org/stubs/handler_api.php', 2),
   ('smsman',      'SMSMAN_API_KEY_PLACEHOLDER',      'https://api.sms-man.com/control',                    1),
   ('fivesim',     'FIVESIM_API_KEY_PLACEHOLDER',     'https://5sim.net/v1',                                3)
 ON CONFLICT (provider_name) DO NOTHING;
+
+UPDATE providers
+SET base_url = 'https://sms-activate.org/stubs/handler_api.php'
+WHERE provider_name = 'smsactivate'
+  AND base_url IN (
+    'https://api.hero-sms.com/stubs/handler_api.php',
+    'https://api.sms-activate.io/stubs/handler_api.php'
+  );

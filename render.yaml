@@ -85,6 +85,10 @@ envVarGroups:
         value: https://www.ringslot.shop
       - key: BACKEND_URL
         value: https://ringslot-backend.onrender.com
+      - key: SMSACTIVATE_BASE_URL
+        value: https://sms-activate.org/stubs/handler_api.php
+      - key: SMSMAN_MIN_API_BALANCE
+        value: "12"
       - key: RESEND_FROM_EMAIL
         value: "RingSlot <noreply@ringslot.shop>"
       - key: SUPPORT_EMAIL
