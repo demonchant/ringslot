@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import api from '../utils/api';
+import { celebrateRegistration } from '../components/RegistrationConfetti';
 
 function PurpleLogo({ size = 34 }) {
   const inner = Math.round(size * 0.7);
@@ -56,17 +57,20 @@ export default function Register() {
       const res = await api.post('/auth/register', { email: form.email.trim().toLowerCase(), password: form.password });
       if (res.status === 202 && res.data?.requiresVerification) {
         sessionStorage.setItem('rs_verification_email', form.email.trim().toLowerCase());
-        router.replace('/login?verification=sent');
+        celebrateRegistration();
+        setTimeout(() => router.replace('/login?verification=sent'), 900);
       } else if (res.status === 201 && res.data?.token) {
         localStorage.setItem('rs_token', res.data.token);
         localStorage.setItem('rs_user', JSON.stringify(res.data.user));
-        router.replace('/dashboard');
+        celebrateRegistration();
+        setTimeout(() => router.replace('/dashboard'), 900);
       } else if (res.status === 409) {
         setError('This email is already registered.');
       } else {
         setError(res.data?.error || 'Registration failed. Please try again.');
       }
     } catch (err) {
+      if (err.response?.data?.accountCreated) celebrateRegistration();
       if (err.response?.status === 409) setError('This email is already registered.');
       else if (err.response?.status === 429) setError('Too many attempts. Please wait and try again.');
       else setError(err.response?.data?.error || 'Cannot reach server. Please try again.');

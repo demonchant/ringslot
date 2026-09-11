@@ -312,3 +312,29 @@ body {
   from { background-position: -200% center; }
   to   { background-position: 200% center; }
 }
+
+.registration-confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  overflow: hidden;
+  pointer-events: none;
+}
+.registration-confetti span {
+  position: absolute;
+  top: -18px;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  animation-name: registration-confetti-fall;
+  animation-timing-function: cubic-bezier(.2,.75,.35,1);
+  animation-fill-mode: forwards;
+}
+@keyframes registration-confetti-fall {
+  0% { opacity: 1; translate: 0 0; }
+  70% { opacity: 1; }
+  100% { opacity: 0; translate: 24px 105vh; rotate: 720deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .registration-confetti { display: none; }
+}

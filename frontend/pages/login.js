@@ -41,6 +41,7 @@ export default function Login() {
     if (verify === 'expired')      setError('Verification link expired. Please sign in again.');
     if (verify === 'invalid')      setError('Invalid verification link. Please try again.');
     if (verify === 'already_used') setError('Link already used. Please sign in.');
+    if (router.query?.reason === 'inactive') setError('You were signed out after 10 minutes of inactivity.');
     if (router.query?.verification === 'sent') {
       setSentTo(sessionStorage.getItem('rs_verification_email') || 'your email address');
       sessionStorage.removeItem('rs_verification_email');

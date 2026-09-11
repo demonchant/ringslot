@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import api from '../utils/api';
+import { celebrateRegistration } from './RegistrationConfetti';
 
 const TICKER = ['Telegram','WhatsApp','Google','Instagram','Discord','Binance','TikTok','Facebook','Snapchat','Twitter/X'];
 
 export default function Hero() {
+  const router = useRouter();
   const [tick, setTick] = useState(0);
   const [form, setForm] = useState({ email:'', password:'', confirm:'' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
-  const router_ref = typeof window !== 'undefined' ? window : null;
 
   useEffect(() => {
     const t = setInterval(() => setTick(p => (p+1) % TICKER.length), 2000);
@@ -26,13 +28,20 @@ export default function Hero() {
       const res = await api.post('/auth/register', { email: form.email.trim().toLowerCase(), password: form.password });
       if (res.status === 202 && res.data?.requiresVerification) {
         sessionStorage.setItem('rs_verification_email', form.email.trim().toLowerCase());
-        window.location.href = '/login?verification=sent';
+        setDone(true);
+        celebrateRegistration();
+        setTimeout(() => router.push('/login?verification=sent'), 900);
       } else if (res.status === 201 && res.data?.token) {
         localStorage.setItem('rs_token', res.data.token);
         localStorage.setItem('rs_user', JSON.stringify(res.data.user));
-        window.location.href = '/dashboard';
+        setDone(true);
+        celebrateRegistration();
+        setTimeout(() => router.push('/dashboard'), 900);
       } else { setError(res.data?.error || 'Registration failed'); }
-    } catch (err) { setError(err.response?.data?.error || 'Cannot reach server. Try again.'); }
+    } catch (err) {
+      if (err.response?.data?.accountCreated) celebrateRegistration();
+      setError(err.response?.data?.error || 'Cannot reach server. Try again.');
+    }
     setLoading(false);
   }
 

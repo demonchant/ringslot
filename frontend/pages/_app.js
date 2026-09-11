@@ -1,6 +1,8 @@
 import '../styles/globals.css';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import InactivityLogout from '../components/InactivityLogout';
+import RegistrationConfetti from '../components/RegistrationConfetti';
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -15,5 +17,11 @@ export default function App({ Component, pageProps }) {
     }
   }, [router.pathname]);
 
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <InactivityLogout />
+      <RegistrationConfetti />
+      <Component {...pageProps} />
+    </>
+  );
 }

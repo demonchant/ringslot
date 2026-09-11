@@ -100,19 +100,19 @@ export async function sendWelcomeEmail({ to }) {
 // ── 2. Login verification (new device) ───────────────────────
 export async function sendLoginVerificationEmail({ to, token, deviceLabel, ip, isFirstLogin }) {
   const verifyUrl = `${BACKEND_URL}/api/auth/verify-device/${token}`;
-  const subject   = isFirstLogin ? 'Confirm your RingSlot sign-in' : `New sign-in to RingSlot from ${deviceLabel}`;
-  const preheader = isFirstLogin ? 'Click to confirm your first sign-in. Expires in 15 minutes.' : `New device detected: ${deviceLabel}. Was that you?`;
+  const subject   = isFirstLogin ? 'Verify your RingSlot email address' : `New sign-in to RingSlot from ${deviceLabel}`;
+  const preheader = isFirstLogin ? 'Use your private link to verify your email. Expires in 15 minutes.' : `New device detected: ${deviceLabel}. Was that you?`;
   const timeStr   = new Date().toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short' });
   const body = `
-    <h1 class="h1">${isFirstLogin ? 'Confirm your sign-in' : 'New device sign-in'}</h1>
+    <h1 class="h1">${isFirstLogin ? 'Verify your email address' : 'New device sign-in'}</h1>
     <p class="p">${isFirstLogin
-      ? 'Welcome! We detected your first sign-in to RingSlot. Please confirm it was you.'
+      ? 'Welcome! Use this private, one-time link to confirm that this email address belongs to you.'
       : 'A sign-in to your RingSlot account was attempted from a new device. If this was you, click confirm below.'
     }</p>
     <div class="info"><span style="color:#8c8680;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Device</span>&nbsp;&nbsp;<strong>${deviceLabel}</strong></div>
     <div class="info"><span style="color:#8c8680;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em">IP Address</span>&nbsp;&nbsp;<strong>${ip || 'Unknown'}</strong></div>
     <div class="info"><span style="color:#8c8680;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Time</span>&nbsp;&nbsp;<strong>${timeStr}</strong></div>
-    <a href="${verifyUrl}" class="btn">Confirm this sign-in →</a>
+    <a href="${verifyUrl}" class="btn">${isFirstLogin ? 'Verify my email' : 'Confirm this sign-in'} →</a>
     <div class="warn">⏱ <strong>This link expires in 15 minutes.</strong> If you did not attempt to sign in, <a href="${SITE_URL}/support">contact support</a> immediately and change your password.</div>
     ${!isFirstLogin ? `<div class="danger">🔒 <strong>Not you?</strong> <a href="${SITE_URL}/auth/forgot-password">Reset your password immediately</a>.</div>` : ''}`;
   const text = `${subject}\n\nDevice: ${deviceLabel}\nIP: ${ip || 'Unknown'}\nTime: ${new Date().toISOString()}\n\nConfirm here (expires 15 min):\n${verifyUrl}\n\nNot you? Contact ${REPLY_TO} immediately.`;
