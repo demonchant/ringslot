@@ -476,7 +476,11 @@ export default function Dashboard() {
                       <tr key={o.id}>
                         <td>
                           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                            <ServiceLogo serviceKey={o.service} size={22} />
+                            <ServiceLogo
+                              serviceKey={o.service}
+                              displayName={services.find((item) => item.service_key === o.service)?.display_name || o.service}
+                              size={22}
+                            />
                             <span style={{ fontSize:13 }}>{o.service}</span>
                           </div>
                         </td>

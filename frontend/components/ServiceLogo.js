@@ -208,8 +208,17 @@ const BRAND_SLUGS = {
   google: 'google', microsoft: 'microsoft', amazon: 'amazon', paypal: 'paypal',
 };
 
+const SERVICE_KEY_ALIASES = {
+  tg: 'telegram', wa: 'whatsapp', ig: 'instagram', fb: 'facebook', go: 'google',
+  tw: 'twitter', x: 'twitter', vi: 'viber', wb: 'wechat', am: 'amazon',
+  ds: 'discord', nf: 'netflix', sp: 'spotify', ya: 'yahoo', li: 'linkedin',
+  tt: 'tiktok', sn: 'snapchat', ub: 'uber', ot: 'microsoftoutlook',
+  kakao: 'kakaotalk', booking: 'bookingdotcom', proton: 'protonmail',
+};
+
 function simpleIconSlug(serviceKey, displayName) {
-  const key = String(serviceKey || '').toLowerCase();
+  const rawKey = String(serviceKey || '').toLowerCase();
+  const key = SERVICE_KEY_ALIASES[rawKey] || rawKey;
   if (BRAND_SLUGS[key]) return BRAND_SLUGS[key];
   return String(displayName || serviceKey || '')
     .normalize('NFKD')
@@ -235,11 +244,17 @@ function GenericIcon({ letter, color }) {
 }
 
 export function ServiceLogo({ serviceKey, displayName, size = 36 }) {
-  const logo = LOGOS[serviceKey?.toLowerCase()];
+  const rawKey = String(serviceKey || '').toLowerCase();
+  const canonicalKey = SERVICE_KEY_ALIASES[rawKey] || rawKey;
+  const logo = LOGOS[canonicalKey];
   const remoteSlug = simpleIconSlug(serviceKey, displayName);
   const [remoteFailed, setRemoteFailed] = useState(false);
+  const [remoteLoaded, setRemoteLoaded] = useState(false);
 
-  useEffect(() => setRemoteFailed(false), [remoteSlug]);
+  useEffect(() => {
+    setRemoteFailed(false);
+    setRemoteLoaded(false);
+  }, [remoteSlug]);
 
   if (!logo && !remoteFailed && remoteSlug) {
     return (
@@ -247,16 +262,22 @@ export function ServiceLogo({ serviceKey, displayName, size = 36 }) {
         width: size, height: size, borderRadius: 8,
         background: '#fff', border: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', flexShrink: 0, padding: 6,
+        overflow: 'hidden', flexShrink: 0, position: 'relative',
       }}>
+        <GenericIcon letter={(displayName || canonicalKey)?.[0] || '?'} color="var(--accent)" />
         <img
           src={`https://cdn.simpleicons.org/${remoteSlug}`}
-          alt=""
+          alt={`${displayName || serviceKey || 'Service'} logo`}
           width={Math.max(size - 12, 12)}
           height={Math.max(size - 12, 12)}
           loading="lazy"
           onError={() => setRemoteFailed(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          onLoad={() => setRemoteLoaded(true)}
+          style={{
+            position: 'absolute', inset: 6,
+            width: 'calc(100% - 12px)', height: 'calc(100% - 12px)', objectFit: 'contain',
+            opacity: remoteLoaded ? 1 : 0,
+          }}
         />
       </div>
     );
