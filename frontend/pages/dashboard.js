@@ -67,8 +67,6 @@ export default function Dashboard() {
     return () => document.removeEventListener('mousedown', onDown);
   }, []);
 
-  useEffect(() => { setAreaCode(''); }, [country]);
-
   async function loadAll() {
     try { const r = await api.get('/wallet/balance'); setBalance(r.data.balance); } catch {}
     try { const r = await api.get('/services'); setServices(r.data); } catch {} finally { setSvcLoading(false); }
