@@ -33,12 +33,12 @@ export default function Dashboard() {
   const [search, setSearch]     = useState('');
   const [service, setService]   = useState('');
   const [country, setCountry]   = useState('any');
-  const [areaCode, setAreaCode] = useState('');
   const [ctySearch, setCtySearch] = useState('');
   const [showDrop, setShowDrop] = useState(false);
   const [dropPos, setDropPos]   = useState({ top:0, left:0, width:300 });
   const [buyLoading, setBuyLoading] = useState(false);
   const [buyError, setBuyError] = useState('');
+  const [needsDeposit, setNeedsDeposit] = useState(false);
 
   const [order, setOrder]       = useState(null);
   const [copied, setCopied]     = useState('');
@@ -78,9 +78,9 @@ export default function Dashboard() {
   async function handleBuy(e) {
     e.preventDefault();
     if (!service) return setBuyError('Please select a service');
-    setBuyLoading(true); setBuyError('');
+    setBuyLoading(true); setBuyError(''); setNeedsDeposit(false);
     try {
-      const ctry = areaCode || getBaseCountry(country);
+      const ctry = getBaseCountry(country);
       const res  = await api.post('/orders/buy', { service, country: ctry });
       if (res.status !== 200 && res.status !== 201) {
         setBuyLoading(false);
@@ -94,7 +94,10 @@ export default function Dashboard() {
       poll(res.data.orderId);
       try { const r = await api.get('/wallet/balance'); setBalance(r.data.balance); } catch {}
       try { const r = await api.get('/orders'); setOrders(r.data); } catch {}
-    } catch (err) { setBuyError(err.response?.data?.error || err.message || 'Purchase failed'); }
+    } catch (err) {
+      if (err.response?.status === 402) setNeedsDeposit(true);
+      setBuyError(err.response?.data?.error || err.message || 'Purchase failed');
+    }
     setBuyLoading(false);
   }
 
@@ -168,8 +171,6 @@ export default function Dashboard() {
   );
   const selC  = COUNTRIES.find(c => c.code === country) || COUNTRIES[0];
   const selS  = services.find(s => s.service_key === service);
-  const areas = selC?.areaCodes || null;
-
   const rentLabel = rentDuration === '365' ? '1 Year'
     : rentDuration === '30' ? '1 Month'
     : rentDuration + ' Days';
@@ -182,7 +183,7 @@ export default function Dashboard() {
     <div className="page">
       <Head><title>Dashboard — RingSlot</title><meta name="robots" content="noindex"/></Head>
       <Navbar />
-      <div className="wrap" style={{ paddingTop:40, paddingBottom:60 }}>
+      <div className="wrap" style={{ paddingTop:108, paddingBottom:60 }}>
 
         {/* Header */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:32, flexWrap:'wrap', gap:16 }}>
@@ -214,7 +215,16 @@ export default function Dashboard() {
 
             <div className="card fade-up" style={{ opacity: focus ? 0.4 : 1, transition:'opacity .3s' }}>
               <h2 style={{ fontSize:16, fontWeight:700, marginBottom:20, letterSpacing:'-0.02em', color:'var(--text)' }}>Get a number</h2>
-              {buyError && <div className="alert alert-error" style={{ marginBottom:16 }}>{buyError}</div>}
+              {buyError && (
+                <div className="alert alert-error" style={{ marginBottom:16 }}>
+                  <div>{buyError}</div>
+                  {needsDeposit && (
+                    <button type="button" className="btn btn-primary btn-sm" onClick={() => router.push('/deposit')} style={{ marginTop:10 }}>
+                      Deposit funds
+                    </button>
+                  )}
+                </div>
+              )}
 
               <form onSubmit={handleBuy}>
                 <div className="field">
@@ -248,7 +258,7 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                <div className="field" style={{ marginBottom: areas ? 12 : 24 }}>
+                <div className="field" style={{ marginBottom:24 }}>
                   <label className="label">Country</label>
                   <button type="button" ref={ctyRef} onClick={openDrop}
                     style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:'11px 14px',
@@ -258,43 +268,9 @@ export default function Dashboard() {
                       borderRadius:10, cursor:'pointer', textAlign:'left', transition:'all .15s' }}>
                     <span style={{ fontSize:18 }}>{selC.flag}</span>
                     <span style={{ fontSize:14, color:'var(--text)', fontWeight:500, flex:1 }}>{selC.name}</span>
-                    {areas && <span style={{ fontSize:10, color:'var(--accent)', fontWeight:600, background:'var(--accent-dim)', padding:'2px 8px', borderRadius:10, marginRight:4 }}>area codes</span>}
                     <span style={{ color:'var(--text-3)', fontSize:10, transform: showDrop ? 'rotate(180deg)' : 'none', transition:'transform .2s', display:'inline-block' }}>&#9660;</span>
                   </button>
                 </div>
-
-                {areas && (
-                  <div className="field" style={{ marginBottom:24 }}>
-                    <label className="label">
-                      Area / State / Region
-                      <span style={{ fontSize:10, color:'var(--text-3)', fontWeight:400, textTransform:'none', letterSpacing:0, marginLeft:6 }}>- optional</span>
-                    </label>
-                    <div style={{ display:'flex', flexDirection:'column', gap:5, maxHeight:200, overflowY:'auto' }}>
-                      <button type="button" onClick={() => setAreaCode('')}
-                        style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 14px',
-                          background: areaCode === '' ? 'var(--accent-dim)' : 'var(--surface-2)',
-                          border: '1px solid ' + (areaCode === '' ? 'var(--accent-border)' : 'var(--border)'),
-                          borderRadius:8, cursor:'pointer', textAlign:'left' }}>
-                        <span style={{ fontSize:16 }}>{selC.flag}</span>
-                        <span style={{ fontSize:13, color: areaCode === '' ? 'var(--accent)' : 'var(--text)', fontWeight: areaCode === '' ? 700 : 400 }}>Any area (auto cheapest)</span>
-                        {areaCode === '' && <span style={{ marginLeft:'auto', color:'var(--accent)' }}>&#10003;</span>}
-                      </button>
-                      {areas.map(ac => (
-                        <button key={ac.code} type="button" onClick={() => setAreaCode(ac.code)}
-                          style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 14px',
-                            background: areaCode === ac.code ? 'var(--accent-dim)' : 'var(--surface-2)',
-                            border: '1px solid ' + (areaCode === ac.code ? 'var(--accent-border)' : 'var(--border)'),
-                            borderRadius:8, cursor:'pointer', textAlign:'left' }}>
-                          <span style={{ fontFamily:'JetBrains Mono,monospace', fontSize:11, color:'var(--accent)', fontWeight:700, minWidth:32 }}>
-                            {ac.code.split('_').slice(1).join('_').toUpperCase()}
-                          </span>
-                          <span style={{ fontSize:12, color: areaCode === ac.code ? 'var(--accent)' : 'var(--text-2)', fontWeight: areaCode === ac.code ? 600 : 400, flex:1 }}>{ac.label}</span>
-                          {areaCode === ac.code && <span style={{ color:'var(--accent)', flexShrink:0 }}>&#10003;</span>}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 <button className="btn btn-primary btn-full" type="submit" disabled={buyLoading || !service}>
                   {buyLoading ? (
@@ -325,7 +301,6 @@ export default function Dashboard() {
                     <div onClick={() => copy(order.number, 'num')} style={{ fontFamily:'JetBrains Mono,monospace', fontSize:'clamp(18px,4vw,24px)', fontWeight:700, color:'var(--accent)', cursor:'pointer' }}>
                       {order.number}
                     </div>
-                    {areaCode && <div style={{ fontSize:11, color:'var(--text-3)', marginTop:4 }}>Region: {areaCode.replace(/_/g, ' > ').toUpperCase()}</div>}
                   </div>
 
                   {countdown > 0 && order.status === 'waiting' && (
@@ -565,7 +540,6 @@ export default function Dashboard() {
                 <span style={{ fontSize:20 }}>{c.flag}</span>
                 <div style={{ flex:1 }}>
                   <span style={{ fontSize:13, color: country === c.code ? 'var(--accent)' : 'var(--text)', fontWeight: country === c.code ? 700 : 400 }}>{c.name}</span>
-                  {c.areaCodes && <span style={{ display:'block', fontSize:10, color:'var(--text-3)' }}>{c.areaCodes.length} area codes</span>}
                 </div>
                 {country === c.code && <span style={{ color:'var(--accent)', flexShrink:0 }}>&#10003;</span>}
               </button>

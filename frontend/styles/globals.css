@@ -251,9 +251,28 @@ body {
 /* ── Utility ─────────────────────────────────────────── */
 .hide-mobile  { display: flex; }
 .hide-desktop { display: none; }
+.nav-desktop { display: flex; }
+.nav-mobile-toggle,
+.nav-mobile-menu { display: none !important; }
+.nav-mobile-actions { display: flex; }
+
+/* The signed-in navbar needs more room than the rest of the mobile layout. */
+@media (max-width: 1120px) {
+  .nav-desktop { display: none !important; }
+  .nav-mobile-toggle { display: flex !important; }
+  .nav-mobile-menu {
+    display: flex !important;
+    flex-direction: column;
+    max-height: calc(100dvh - 68px);
+    overflow-y: auto;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  }
+}
 @media (max-width: 768px) {
   .hide-mobile  { display: none !important; }
   .hide-desktop { display: flex !important; }
+  .nav-mobile-actions { flex-direction: column; }
+  .nav-mobile-actions > * { width: 100%; }
 }
 .service-icon { background: var(--surface-3); display: flex; align-items: center; justify-content: center; }
 

@@ -51,6 +51,26 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [router.asPath]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [menuOpen]);
+
   function logout() {
     localStorage.removeItem('rs_token');
     localStorage.removeItem('rs_user');
@@ -74,7 +94,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop links */}
-          <div className="hide-mobile" style={{ display:'flex', alignItems:'center', gap:2, flex:1 }}>
+          <div className="nav-desktop" style={{ alignItems:'center', gap:2, flex:1 }}>
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} style={{ padding:'7px 13px', borderRadius:9, fontSize:14, fontWeight:500, color: isActive(href) ? 'var(--primary-600)' : textMuted, background: isActive(href) ? 'var(--primary-50)' : 'transparent', transition:'all 0.15s', textDecoration:'none' }}
                 onMouseEnter={e => { if (!isActive(href)) { e.currentTarget.style.color=textColor; e.currentTarget.style.background='rgba(0,0,0,0.04)'; }}}
@@ -84,7 +104,7 @@ export default function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="hide-mobile" style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <div className="nav-desktop" style={{ alignItems:'center', gap:10 }}>
             {user ? (
               <>
                 {balance !== null && (
@@ -118,7 +138,15 @@ export default function Navbar() {
           </div>
 
           {/* Mobile hamburger */}
-          <button className="hide-desktop" onClick={() => setMenuOpen(!menuOpen)} style={{ marginLeft:'auto', background:'none', border:'none', color:textColor, cursor:'pointer', padding:8, display:'flex', flexDirection:'column', gap:5 }}>
+          <button
+            className="nav-mobile-toggle"
+            type="button"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+            style={{ marginLeft:'auto', background:'none', border:'none', color:textColor, cursor:'pointer', padding:8, flexDirection:'column', gap:5 }}
+          >
             <span style={{ display:'block', width:22, height:2, background: menuOpen?'var(--primary-500)':textColor, borderRadius:2, transition:'all .2s', transform: menuOpen?'rotate(45deg) translate(5px,5px)':'none' }} />
             <span style={{ display:'block', width:22, height:2, background:textColor, borderRadius:2, opacity:menuOpen?0:1, transition:'all .2s' }} />
             <span style={{ display:'block', width:22, height:2, background: menuOpen?'var(--primary-500)':textColor, borderRadius:2, transition:'all .2s', transform: menuOpen?'rotate(-45deg) translate(5px,-5px)':'none' }} />
@@ -128,21 +156,21 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="hide-desktop" style={{ position:'fixed', top:68, left:0, right:0, zIndex:99, background:'rgba(255,255,255,0.99)', backdropFilter:'blur(20px)', borderBottom:'1px solid var(--slate-100)', padding:'16px 24px 28px' }} onClick={() => setMenuOpen(false)}>
+        <div id="mobile-navigation" className="nav-mobile-menu" style={{ position:'fixed', top:68, left:0, right:0, zIndex:99, background:'rgba(255,255,255,0.99)', backdropFilter:'blur(20px)', borderBottom:'1px solid var(--slate-100)', padding:'16px 24px 28px' }}>
           {NAV_LINKS.map(({ href, label }) => (
-            <Link key={href} href={href} style={{ display:'block', padding:'13px 0', fontSize:16, fontWeight:600, color: isActive(href)?'var(--primary-600)':textColor, borderBottom:'1px solid var(--slate-100)', textDecoration:'none' }}>{label}</Link>
+            <Link key={href} href={href} onClick={() => setMenuOpen(false)} style={{ display:'block', padding:'13px 0', fontSize:16, fontWeight:600, color: isActive(href)?'var(--primary-600)':textColor, borderBottom:'1px solid var(--slate-100)', textDecoration:'none' }}>{label}</Link>
           ))}
-          <div style={{ marginTop:20, display:'flex', gap:10 }}>
+          <div className="nav-mobile-actions" style={{ marginTop:20, gap:10 }}>
             {user ? (
               <>
-                {['admin', 'superadmin'].includes(user.role) && <Link href="/admin" style={{ flex:1 }}><button style={{ width:'100%', padding:'12px', border:'1px solid var(--primary-200)', borderRadius:10, background:'var(--primary-50)', color:'var(--primary-600)', fontWeight:700 }}>Admin</button></Link>}
-                <Link href="/dashboard" style={{ flex:1 }}><button className="btn-purple" style={{ width:'100%' }}>Dashboard</button></Link>
+                {['admin', 'superadmin'].includes(user.role) && <Link href="/admin" onClick={() => setMenuOpen(false)} style={{ flex:1 }}><button style={{ width:'100%', padding:'12px', border:'1px solid var(--primary-200)', borderRadius:10, background:'var(--primary-50)', color:'var(--primary-600)', fontWeight:700 }}>Admin</button></Link>}
+                <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ flex:1 }}><button className="btn-purple" style={{ width:'100%' }}>Dashboard</button></Link>
                 <button onClick={logout} style={{ flex:1, padding:'12px', background:'none', border:'1px solid var(--slate-200)', borderRadius:10, color:textColor, fontSize:15, fontWeight:600, cursor:'pointer' }}>Sign out</button>
               </>
             ) : (
               <>
-                <Link href="/login" style={{ flex:1 }}><button style={{ width:'100%', padding:'12px', background:'none', border:'1px solid var(--slate-200)', borderRadius:10, color:textColor, fontSize:15, fontWeight:600, cursor:'pointer' }}>Sign in</button></Link>
-                <Link href="/register" style={{ flex:1 }}><button className="btn-purple" style={{ width:'100%' }}>Get started</button></Link>
+                <Link href="/login" onClick={() => setMenuOpen(false)} style={{ flex:1 }}><button style={{ width:'100%', padding:'12px', background:'none', border:'1px solid var(--slate-200)', borderRadius:10, color:textColor, fontSize:15, fontWeight:600, cursor:'pointer' }}>Sign in</button></Link>
+                <Link href="/register" onClick={() => setMenuOpen(false)} style={{ flex:1 }}><button className="btn-purple" style={{ width:'100%' }}>Get started</button></Link>
               </>
             )}
           </div>

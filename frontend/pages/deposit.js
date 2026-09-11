@@ -127,7 +127,7 @@ export default function Deposit() {
   return (
     <div className="page">
       <Navbar />
-      <div className="wrap" style={{ paddingTop: 40, paddingBottom: 60, maxWidth: 600 }}>
+      <div className="wrap" style={{ paddingTop: 108, paddingBottom: 60, maxWidth: 600 }}>
 
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ fontSize: 'clamp(24px,5vw,36px)', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: 8, color: 'var(--text)' }}>Deposit funds</h1>

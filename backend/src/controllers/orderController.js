@@ -1,5 +1,5 @@
 import { query, getClient } from '../config/database.js';
-import { buyWithFailover, cancelOrder } from '../services/providerRouter.js';
+import { buyWithFailover, cancelOrder, getPurchaseQuote } from '../services/providerRouter.js';
 import { applyMarkup } from '../services/markupEngine.js';
 import logger from '../utils/logger.js';
 
@@ -34,11 +34,36 @@ export async function buyNumber(req, res) {
   );
   if (!validService.rows.length) return res.status(400).json({ error: 'Unsupported service' });
 
+  // Do not reserve inventory from an upstream supplier for an account that
+  // cannot pay. Apart from wasting a scarce number, an upstream failure here
+  // used to hide the useful "Insufficient balance" response from the user.
+  const { rows: walletRows } = await query(
+    'SELECT balance FROM wallets WHERE user_id = $1',
+    [req.user.id]
+  );
+  const availableBalance = Number(walletRows[0]?.balance || 0);
+  if (!(availableBalance > 0)) {
+    return res.status(402).json({
+      error: 'Insufficient balance. Deposit funds before purchasing a number.',
+      balance: availableBalance,
+    });
+  }
+
   let acquired = null;
   let committed = false;
 
   let client;
   try {
+    const quote = await getPurchaseQuote(service, country);
+    const { userPrice: quotedPrice } = await applyMarkup(service, quote.providerPrice);
+    if (availableBalance < quotedPrice) {
+      return res.status(402).json({
+        error: `Insufficient balance. You need $${quotedPrice.toFixed(4)} for this number.`,
+        balance: availableBalance,
+        required: quotedPrice,
+      });
+    }
+
     acquired = await buyWithFailover(service, country);
     const { id: providerOrderId, number, provider, providerPrice } = acquired;
     const { userPrice } = await applyMarkup(service, providerPrice);
@@ -102,6 +127,16 @@ export async function buyNumber(req, res) {
     if (acquired && !committed) {
       await cancelOrder(acquired.provider, acquired.id).catch((error) => {
         logger.warn('Failed to release number after purchase error', { provider: acquired.provider, providerOrderId: acquired.id, error: error.message });
+      });
+    }
+    if (err.message === 'No provider has inventory for this service and country') {
+      return res.status(409).json({
+        error: 'No numbers are currently available for that service and country. Try another country or service.',
+      });
+    }
+    if (err.message === 'All providers temporarily unavailable') {
+      return res.status(503).json({
+        error: 'Number suppliers are temporarily unavailable. Please try again shortly.',
       });
     }
     logger.error('Buy number failed', { error: err.message });

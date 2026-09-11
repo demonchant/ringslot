@@ -33,19 +33,33 @@ async function getPrice(provider, service, country) {
   }
 }
 
-export async function buyWithFailover(service, country = 'any') {
-  const providers = await enabledProviders();
-
-  // Filter by circuit breaker health
-  const available = providers.filter(p => providerHealth.isAvailable(p.name));
-  if (!available.length) throw new Error('All providers temporarily unavailable');
-
+function prioritizeProviders(providers) {
   const primaryProvider = process.env.PRIMARY_PROVIDER || 'smsman';
-  const ordered = [...available].sort((a, b) => {
+  return [...providers].sort((a, b) => {
     if (a.name === primaryProvider) return -1;
     if (b.name === primaryProvider) return 1;
     return 0;
   });
+}
+
+async function purchaseProviders() {
+  const providers = await enabledProviders();
+  const available = providers.filter((provider) => providerHealth.isAvailable(provider.name));
+  if (!available.length) throw new Error('All providers temporarily unavailable');
+  return prioritizeProviders(available);
+}
+
+export async function getPurchaseQuote(service, country = 'any') {
+  const providers = await purchaseProviders();
+  for (const provider of providers) {
+    const providerPrice = await getPrice(provider, service, country);
+    if (providerPrice > 0) return { provider: provider.name, providerPrice };
+  }
+  throw new Error('No provider has inventory for this service and country');
+}
+
+export async function buyWithFailover(service, country = 'any') {
+  const ordered = await purchaseProviders();
 
   for (const p of ordered) {
     try {
